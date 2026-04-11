@@ -1,0 +1,71 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <a class="back-link" routerLink="/auth">Назад</a>
+
+    <h1>Вход</h1>
+    <p class="subtitle">{{ roleMeta().loginSubtitle }}</p>
+
+    <ng-template #emailError let-control>
+      @if (control.hasError('required')) {
+        <span>Введите почту</span>
+      }
+      @if (control.hasError('email') && !control.hasError('required')) {
+        <span>Введите корректный e-mail</span>
+      }
+    </ng-template>
+
+    <ng-template #passwordError let-control>
+      @if (control.hasError('required')) {
+        <span>Введите пароль</span>
+      }
+      @if (control.hasError('minlength') && !control.hasError('required')) {
+        <span>Пароль должен содержать минимум 8 символов</span>
+      }
+    </ng-template>
+
+    <form nz-form [nzLayout]="'vertical'" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <nz-form-item>
+        <nz-form-label [nzRequired]="true" nzFor="email">Почта</nz-form-label>
+        <nz-form-control [nzErrorTip]="emailError">
+          <input nz-input id="email" type="email" formControlName="email" placeholder="Почта" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzRequired]="true" nzFor="password">Пароль</nz-form-label>
+        <nz-form-control [nzErrorTip]="passwordError">
+          <input
+            nz-input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="Пароль"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <button
+        nz-button
+        nzType="primary"
+        class="submit-btn"
+        type="submit"
+        [nzLoading]="isSubmitting()"
+      >
+        Войти
+      </button>
+    </form>
+
+    @if (errorMessage(); as message) {
+      <p class="error">{{ message }}</p>
+    }
+
+    @if (roleMeta().registerPath; as registerPath) {
+      <p class="hint">
+        Нет аккаунта?
+        <a [routerLink]="registerPath">Зарегистрироваться</a>
+      </p>
+    } @else {
+      <p class="hint">Для роли администратора доступен только вход.</p>
+    }
+  </div>
+</div>

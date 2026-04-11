@@ -1,0 +1,282 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <a class="back-link" routerLink="/auth">Назад</a>
+
+    <h1>Регистрация</h1>
+    <p class="subtitle">{{ roleMeta().registerSubtitle }}</p>
+
+    <ng-template #requiredTextError let-control>
+      @if (control.hasError('required')) {
+        <span>Заполните поле</span>
+      }
+      @if (control.hasError('minlength') && !control.hasError('required')) {
+        <span>Слишком короткое значение</span>
+      }
+    </ng-template>
+
+    <ng-template #emailError let-control>
+      @if (control.hasError('required')) {
+        <span>Введите почту</span>
+      }
+      @if (
+        (control.hasError('email') || control.hasError('pattern')) && !control.hasError('required')
+      ) {
+        <span>Введите корректный e-mail</span>
+      }
+    </ng-template>
+
+    <ng-template #phoneError let-control>
+      @if (control.hasError('required')) {
+        <span>Введите телефон</span>
+      }
+      @if (
+        (control.hasError('minlength') || control.hasError('pattern')) &&
+        !control.hasError('required')
+      ) {
+        <span>Введите корректный телефон</span>
+      }
+    </ng-template>
+
+    <ng-template #passwordError let-control>
+      @if (control.hasError('required')) {
+        <span>Введите пароль</span>
+      }
+      @if (control.hasError('minlength') && !control.hasError('required')) {
+        <span>Пароль должен содержать минимум 8 символов</span>
+      }
+    </ng-template>
+
+    <ng-template #repassError let-control>
+      @if (control.hasError('notSame') && !control.hasError('required')) {
+        <span>Пароли не совпадают</span>
+      }
+      @if (control.hasError('required')) {
+        <span>Повторите пароль</span>
+      }
+    </ng-template>
+
+    @if (isUserRegistration()) {
+      <form
+        nz-form
+        [nzLayout]="'vertical'"
+        [formGroup]="userForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+      >
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="firstName">Имя</nz-form-label>
+          <nz-form-control [nzErrorTip]="requiredTextError">
+            <input
+              nz-input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              placeholder="Имя"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="lastName">Фамилия</nz-form-label>
+          <nz-form-control [nzErrorTip]="requiredTextError">
+            <input
+              nz-input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              placeholder="Фамилия"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="userEmail">Почта</nz-form-label>
+          <nz-form-control [nzErrorTip]="emailError">
+            <input
+              nz-input
+              id="userEmail"
+              type="email"
+              formControlName="email"
+              placeholder="Почта"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="userPhone">Телефон</nz-form-label>
+          <nz-form-control [nzErrorTip]="phoneError">
+            <input
+              nz-input
+              id="userPhone"
+              type="tel"
+              formControlName="phone"
+              placeholder="+7 (999) 123-45-67"
+              prefix="+7 "
+              mask="(000) 000-00-00"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="userPassword">Пароль</nz-form-label>
+          <nz-form-control [nzErrorTip]="passwordError">
+            <input
+              nz-input
+              id="userPassword"
+              type="password"
+              formControlName="password"
+              placeholder="Пароль"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="userPasswordConfirm"
+            >Подтвердите пароль</nz-form-label
+          >
+          <nz-form-control [nzErrorTip]="repassError">
+            <input
+              nz-input
+              id="userPasswordConfirm"
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Пароль"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <button
+          nz-button
+          nzType="primary"
+          class="submit-btn"
+          type="submit"
+          [nzLoading]="isSubmitting()"
+        >
+          Зарегистрироваться
+        </button>
+      </form>
+    } @else {
+      <form
+        nz-form
+        [nzLayout]="'vertical'"
+        [formGroup]="companyForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+      >
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="companyName">Название компании</nz-form-label>
+          <nz-form-control [nzErrorTip]="requiredTextError">
+            <input
+              nz-input
+              id="companyName"
+              type="text"
+              formControlName="companyName"
+              placeholder="Название компании"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="contactPerson">Контактное лицо</nz-form-label>
+          <nz-form-control [nzErrorTip]="requiredTextError">
+            <input
+              nz-input
+              id="contactPerson"
+              type="text"
+              formControlName="contactPerson"
+              placeholder="Контактное лицо"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="companyEmail">Почта</nz-form-label>
+          <nz-form-control [nzErrorTip]="emailError">
+            <input
+              nz-input
+              id="companyEmail"
+              type="email"
+              formControlName="email"
+              placeholder="Почта"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="companyPhone">Телефон</nz-form-label>
+          <nz-form-control [nzErrorTip]="phoneError">
+            <input
+              nz-input
+              id="companyPhone"
+              type="tel"
+              formControlName="phone"
+              placeholder="+7 (999) 123-45-67"
+              prefix="+7 "
+              mask="(000) 000-00-00"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="companyAddress">Адрес</nz-form-label>
+          <nz-form-control [nzErrorTip]="requiredTextError">
+            <input
+              nz-input
+              id="companyAddress"
+              type="text"
+              formControlName="address"
+              placeholder="Адрес"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="companyPassword">Пароль</nz-form-label>
+          <nz-form-control [nzErrorTip]="passwordError">
+            <input
+              nz-input
+              id="companyPassword"
+              type="password"
+              formControlName="password"
+              placeholder="Пароль"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true" nzFor="companyPasswordConfirm"
+            >Подтвердите пароль</nz-form-label
+          >
+          <nz-form-control [nzErrorTip]="repassError">
+            <input
+              nz-input
+              id="companyPasswordConfirm"
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Пароль"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <button
+          nz-button
+          nzType="primary"
+          class="submit-btn"
+          type="submit"
+          [nzLoading]="isSubmitting()"
+        >
+          Зарегистрироваться
+        </button>
+      </form>
+    }
+
+    @if (errorMessage(); as message) {
+      <p class="error">{{ message }}</p>
+    }
+
+    <p class="hint">
+      Уже есть аккаунт?
+      <a [routerLink]="roleMeta().loginPath">Войти</a>
+    </p>
+  </div>
+</div>

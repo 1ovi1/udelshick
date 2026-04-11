@@ -1,0 +1,55 @@
+<nz-layout class="app-layout">
+  <nz-sider
+    class="menu-sidebar"
+    nzCollapsible
+    nzWidth="256px"
+    nzBreakpoint="md"
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+    nzTheme="light"
+  >
+    <div class="sidebar-logo">
+      <img src="favicon.svg" alt="лого" />
+      <h1 class="logo">Удельщик</h1>
+    </div>
+    <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+      @for (tab of tabs(); track tab.path) {
+        <li nz-menu-item nzMatchRouter>
+          <a [routerLink]="toLayoutLink(tab.path)">
+            <span nz-icon [nzType]="tab.icon"></span>
+            <span>{{ tab.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header>
+      <div class="app-header">
+        <nz-icon
+          class="trigger"
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+          (click)="isCollapsed = !isCollapsed"
+        />
+        @if (user(); as currentUser) {
+          <div class="header-user" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click">
+            <nz-avatar nzSize="default" class="user-avatar" [nzIcon]="userAvatarIcon()" />
+            <span class="user-name">{{ currentUser.name }}</span>
+          </div>
+
+          <nz-dropdown-menu #userMenu="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item>
+                <button type="button" class="logout-menu-button" (click)="logout()">
+                  <span nz-icon nzType="logout"></span>
+                  <span>Выйти</span>
+                </button>
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+        }
+      </div>
+    </nz-header>
+    <router-outlet />
+  </nz-layout>
+</nz-layout>

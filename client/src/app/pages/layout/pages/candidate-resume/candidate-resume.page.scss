@@ -1,0 +1,23 @@
+.page {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 28px;
+  color: #101828;
+}
+
+.page-content {
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.hello-box {
+  color: #344054;
+  font-weight: 600;
+}

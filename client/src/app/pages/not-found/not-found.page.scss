@@ -1,0 +1,35 @@
+.not-found {
+  min-height: 100dvh;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 12px;
+  padding: 40px 24px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.code {
+  margin: 0;
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 800;
+  color: #d92d20;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #101828;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: #475467;
+}
+
+.actions {
+  margin-top: 8px;
+}

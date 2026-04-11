@@ -1,0 +1,28 @@
+<!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
+<div class="wrapper">
+  <div class="card">
+    <div class="title">
+      <h1>Удельщик</h1>
+      <p>Ну попробуй найти работу...</p>
+    </div>
+    <div class="cards">
+      <nz-radio-group [(ngModel)]="mode">
+        @for (card of cards; track $index) {
+          <label nz-radio class="card-wrapper" [nzValue]="card.type">
+            <div class="content">
+              <nz-icon [nzType]="card.icon" class="icon" />
+              <div class="info">
+                <h2>{{ card.role }}</h2>
+                <p>{{ card.info }}</p>
+              </div>
+            </div>
+          </label>
+        }
+      </nz-radio-group>
+    </div>
+    <div class="buttons">
+      <button nz-button nzType="primary" (click)="goToLogin()">Войти</button>
+      <button nz-button nzType="default" (click)="goToRegister()">Зарегистрироваться</button>
+    </div>
+  </div>
+</div>
