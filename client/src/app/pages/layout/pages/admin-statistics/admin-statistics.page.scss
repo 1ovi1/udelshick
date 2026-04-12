@@ -1,23 +1,58 @@
 .page {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   padding: 24px;
 }
 
 .page-title {
-  margin: 0;
-  font-size: 28px;
   color: #101828;
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  border: 1px solid #eaecf0;
+
+  .stat-title {
+    color: #667085;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .stat-value {
+    margin-top: 6px;
+    color: #101828;
+    font-size: 30px;
+    line-height: 38px;
+    font-weight: 600;
+  }
+}
+
 .page-content {
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #eaecf0;
   border-radius: 12px;
   padding: 20px;
 }
 
-.hello-box {
-  color: #344054;
+.table-title {
+  color: #101828;
   font-weight: 600;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 1280px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }

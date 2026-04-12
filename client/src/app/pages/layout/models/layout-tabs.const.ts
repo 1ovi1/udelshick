@@ -15,7 +15,7 @@ const CompanyTabs: readonly LayoutMenuItem[] = [
 
 const AdminTabs: readonly LayoutMenuItem[] = [
   { label: 'Статистика', icon: 'bar-chart', path: 'admin/statistics' },
-  { label: 'Компании', icon: 'bank', path: 'admin/companies' },
+  { label: 'Вакансии', icon: 'solution', path: 'admin/vacancies' },
   { label: 'Пользователи', icon: 'user', path: 'admin/users' },
 ];
 

@@ -1,6 +1,66 @@
 <section class="page">
   <h1 class="page-title">Статистика</h1>
+
+  <div class="stats-grid">
+    <nz-card class="stat-card">
+      <div class="stat-title">Количество пользователей</div>
+      <div class="stat-value">{{ metrics().candidatesCount }}</div>
+    </nz-card>
+
+    <nz-card class="stat-card">
+      <div class="stat-title">Количество компаний</div>
+      <div class="stat-value">{{ metrics().companiesCount }}</div>
+    </nz-card>
+
+    <nz-card class="stat-card">
+      <div class="stat-title">Количество вакансий</div>
+      <div class="stat-value">{{ metrics().vacanciesCount }}</div>
+    </nz-card>
+
+    <nz-card class="stat-card">
+      <div class="stat-title">Количество откликов</div>
+      <div class="stat-value">{{ metrics().applicationsCount }}</div>
+    </nz-card>
+  </div>
+
   <nz-content class="page-content">
-    <div class="hello-box">hello AdminStatisticsPage</div>
+    <h4 class="table-title">Последняя активность</h4>
+
+    <nz-table
+      #activityTable
+      [nzData]="activityItems()"
+      [nzFrontPagination]="false"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageIndex()"
+      [nzPageSize]="pageSize()"
+      [nzLoading]="isLoading()"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[5, 10, 20, 50]"
+      (nzQueryParams)="onQueryParamsChange($event)"
+    >
+      <thead>
+        <tr>
+          <th>Статус</th>
+          <th>Пользователь</th>
+          <th>Почта</th>
+          <th>Время</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (item of activityTable.data; track item.authId) {
+          <tr>
+            <td>
+              <nz-tag [nzColor]="toStatusColor(item.status)">{{
+                toStatusLabel(item.status)
+              }}</nz-tag>
+            </td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ formatDateTime(item.createdAt) }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
   </nz-content>
 </section>

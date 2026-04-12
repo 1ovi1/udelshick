@@ -1,1 +1,116 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+  --font-family-base: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  --font-size-base: 14px;
+  --line-height-base: 22px;
+  --heading-weight: 700;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: #101828;
+  background: #f3f4f6;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p) {
+  margin: 0;
+  padding: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+h1,
+.h1 {
+  font-family: var(--font-family-base);
+  font-size: 38px;
+  font-weight: var(--heading-weight);
+  line-height: 46px;
+}
+
+h2,
+.h2 {
+  font-family: var(--font-family-base);
+  font-size: 30px;
+  font-weight: var(--heading-weight);
+  line-height: 40px;
+}
+
+h3,
+.h3 {
+  font-family: var(--font-family-base);
+  font-size: 24px;
+  font-weight: var(--heading-weight);
+  line-height: 32px;
+}
+
+h4,
+.h4 {
+  font-family: var(--font-family-base);
+  font-size: 20px;
+  font-weight: var(--heading-weight);
+  line-height: 28px;
+}
+
+h5,
+.h5 {
+  font-family: var(--font-family-base);
+  font-size: 16px;
+  font-weight: var(--heading-weight);
+  line-height: 24px;
+}
+
+h6,
+.h6 {
+  font-family: var(--font-family-base);
+  font-size: 16px;
+  font-weight: var(--heading-weight);
+  line-height: 24px;
+}
+
+p,
+body,
+input,
+textarea,
+button {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+.ant-typography,
+.ant-btn,
+.ant-menu,
+.ant-table,
+.ant-tabs,
+.ant-card,
+.ant-tag,
+.ant-form,
+.ant-input,
+.ant-select,
+.ant-pagination {
+  font-family: var(--font-family-base);
+}
+
+.ant-table-thead > tr > th {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.ant-table-tbody > tr > td,
+.ant-tabs-tab,
+.ant-menu-item,
+.ant-btn {
+  font-size: 14px;
+  line-height: 22px;
+}

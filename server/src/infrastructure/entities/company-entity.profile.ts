@@ -1,6 +1,14 @@
-import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { AuthEntity } from './auth.entity';
 import { SoftDeletableEntity } from './base/soft-deletable.entity';
+import { VacancyEntity } from './vacancy.entity';
 
 @Entity('company_profiles')
 export class CompanyProfileEntity extends SoftDeletableEntity {
@@ -10,7 +18,9 @@ export class CompanyProfileEntity extends SoftDeletableEntity {
   @Column({ unique: true })
   authId: string;
 
-  @OneToOne(() => AuthEntity, (auth) => auth.companyProfile)
+  @OneToOne(() => AuthEntity, (auth) => auth.companyProfile, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'authId' })
   auth: AuthEntity;
 
@@ -25,4 +35,7 @@ export class CompanyProfileEntity extends SoftDeletableEntity {
 
   @Column()
   address: string;
+
+  @OneToMany(() => VacancyEntity, (vacancy) => vacancy.companyProfile)
+  vacancies?: VacancyEntity[];
 }
