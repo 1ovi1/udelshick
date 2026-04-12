@@ -9,6 +9,7 @@ import {
 import { AuthEntity } from './auth.entity';
 import { SoftDeletableEntity } from './base/soft-deletable.entity';
 import { ApplicationEntity } from './application.entity';
+import { CandidateResumeEntity } from './candidate-resume.entity';
 
 @Entity('candidate_profiles')
 export class CandidateProfileEntity extends SoftDeletableEntity {
@@ -32,6 +33,9 @@ export class CandidateProfileEntity extends SoftDeletableEntity {
 
   @Column()
   phone: string;
+
+  @OneToOne(() => CandidateResumeEntity, (resume) => resume.candidateProfile)
+  resume?: CandidateResumeEntity;
 
   @OneToMany(
     () => ApplicationEntity,

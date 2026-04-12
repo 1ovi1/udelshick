@@ -4,6 +4,14 @@
   padding: 24px;
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .page-title {
   margin: 0;
   font-size: 28px;
@@ -17,7 +25,32 @@
   padding: 20px;
 }
 
-.hello-box {
-  color: #344054;
-  font-weight: 600;
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vacancy-form {
+  max-height: 56vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+:host ::ng-deep .ant-input-number {
+  width: 100%;
+}
+
+:host ::ng-deep .ant-table-pagination.ant-pagination {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
 }

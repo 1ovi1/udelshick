@@ -34,7 +34,7 @@ export class VacancyEntity extends SoftDeletableEntity {
   location: string;
 
   @Column({ type: 'integer', nullable: true })
-  salary?: number;
+  salary: number | null;
 
   @Column({
     type: 'enum',

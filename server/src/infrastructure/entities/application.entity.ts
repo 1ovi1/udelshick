@@ -41,6 +41,6 @@ export class ApplicationEntity extends SoftDeletableEntity {
   })
   status: ApplicationStatus;
 
-  @Column({ nullable: true })
-  resumePdfUrl?: string;
+  @Column({ type: 'varchar', nullable: true })
+  resumePdfUrl: string | null;
 }

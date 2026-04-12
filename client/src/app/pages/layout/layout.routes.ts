@@ -62,6 +62,13 @@ export const LAYOUT_ROUTES: Routes = [
         data: { roles: ['company'] },
       },
       {
+        path: 'company/profile',
+        loadComponent: () =>
+          import('./pages/company-profile/company-profile.page').then((m) => m.CompanyProfilePage),
+        canActivate: [roleTabGuard],
+        data: { roles: ['company'] },
+      },
+      {
         path: 'admin/statistics',
         loadComponent: () =>
           import('./pages/admin-statistics/admin-statistics.page').then(

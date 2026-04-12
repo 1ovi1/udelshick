@@ -149,10 +149,18 @@ export class AdminRepository implements IAdminRepository {
 
   async getVacancies(
     query: PaginationQuery,
+    status?: VacancyStatus,
   ): Promise<PaginatedResult<AdminVacancyItem>> {
     const offset = (query.page - 1) * query.limit;
 
+    const whereCondition: { status?: VacancyStatus } = {};
+
+    if (status !== undefined) {
+      whereCondition.status = status;
+    }
+
     const [vacancies, total] = await this.vacancyRepository.findAndCount({
+      where: whereCondition,
       relations: {
         companyProfile: true,
       },

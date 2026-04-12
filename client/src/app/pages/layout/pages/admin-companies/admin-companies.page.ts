@@ -5,14 +5,25 @@ import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { AdminDataService } from '../../services/admin.service';
 import { AdminVacancyItem } from '../../models/admin/admin-vacancy-item.interface';
 import { AdminVacancyTab } from '../../models/admin/admin-vacancy-tab.type';
 import { VacancyStatus } from '../../models/admin/vacancy-status.type';
+import { ADMIN_VACANCY_TABS } from './constants/admin-vacancy-tab-view.constant';
+import { formatDateRu } from '../../utils/date-format.util';
+import { toVacancyStatusColor, toVacancyStatusLabel } from '../../utils/vacancy-status.util';
 
 @Component({
   selector: 'app-admin-companies-page',
-  imports: [NzLayoutModule, NzTableModule, NzTagModule, NzButtonModule, NzPopconfirmModule],
+  imports: [
+    NzLayoutModule,
+    NzTableModule,
+    NzTagModule,
+    NzButtonModule,
+    NzPopconfirmModule,
+    NzTabsModule,
+  ],
   templateUrl: './admin-companies.page.html',
   styleUrl: './admin-companies.page.scss',
 })
@@ -22,25 +33,21 @@ export class AdminVacanciesPage implements OnInit {
 
   protected readonly isLoading = signal(false);
   protected readonly vacancies = signal<AdminVacancyItem[]>([]);
+  protected readonly tabs = ADMIN_VACANCY_TABS;
+  protected readonly formatDate = formatDateRu;
+  protected readonly toStatusLabel = toVacancyStatusLabel;
+  protected readonly toStatusColor = toVacancyStatusColor;
   protected readonly activeTab = signal<AdminVacancyTab>('all');
   protected readonly pageIndex = signal(1);
   protected readonly pageSize = signal(10);
   protected readonly total = signal(0);
   protected readonly actionVacancyId = signal<string | null>(null);
 
-  protected readonly displayedVacancies = computed(() => {
+  protected readonly selectedTabIndex = computed(() => {
     const tab = this.activeTab();
-    const allVacancies = this.vacancies();
+    const index = this.tabs.findIndex((item) => item.key === tab);
 
-    if (tab === 'published') {
-      return allVacancies.filter((item) => item.status === 'published');
-    }
-
-    if (tab === 'archived') {
-      return allVacancies.filter((item) => item.status === 'archived');
-    }
-
-    return allVacancies;
+    return index >= 0 ? index : 0;
   });
 
   ngOnInit(): void {
@@ -60,8 +67,16 @@ export class AdminVacanciesPage implements OnInit {
     this.loadVacancies();
   }
 
-  protected setTab(tab: AdminVacancyTab): void {
+  protected onTabIndexChange(index: number): void {
+    const tab = this.tabs[index]?.key;
+
+    if (!tab || tab === this.activeTab()) {
+      return;
+    }
+
     this.activeTab.set(tab);
+    this.pageIndex.set(1);
+    this.loadVacancies();
   }
 
   protected publish(vacancyId: string): void {
@@ -76,44 +91,6 @@ export class AdminVacanciesPage implements OnInit {
     this.runAction(vacancyId, () => this.adminDataService.deleteVacancy(vacancyId));
   }
 
-  protected formatDate(value: string | null): string {
-    if (!value) {
-      return '-';
-    }
-
-    const date = new Date(value);
-
-    return new Intl.DateTimeFormat('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(date);
-  }
-
-  protected toStatusLabel(status: VacancyStatus): string {
-    if (status === 'published') {
-      return 'Опубликована';
-    }
-
-    if (status === 'archived') {
-      return 'В архиве';
-    }
-
-    return 'На рассмотрении';
-  }
-
-  protected toStatusColor(status: VacancyStatus): 'green' | 'gold' | 'default' {
-    if (status === 'published') {
-      return 'green';
-    }
-
-    if (status === 'pending_review') {
-      return 'gold';
-    }
-
-    return 'default';
-  }
-
   protected isActionLoading(vacancyId: string): boolean {
     return this.actionVacancyId() === vacancyId;
   }
@@ -121,8 +98,11 @@ export class AdminVacanciesPage implements OnInit {
   private loadVacancies(): void {
     this.isLoading.set(true);
 
+    const activeTab = this.activeTab();
+    const status: VacancyStatus | undefined = activeTab === 'all' ? undefined : activeTab;
+
     this.adminDataService
-      .getVacancies(this.pageIndex(), this.pageSize())
+      .getVacancies(this.pageIndex(), this.pageSize(), status)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {

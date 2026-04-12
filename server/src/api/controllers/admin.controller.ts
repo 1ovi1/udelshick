@@ -1,6 +1,7 @@
 import { Roles } from '@api/decorators/roles.decorator';
 import { AdminDashboardResponseDto } from '@api/dto/admin/admin-dashboard-response.dto';
 import { AdminUsersResponseDto } from '@api/dto/admin/admin-users-response.dto';
+import { AdminVacanciesQueryDto } from '@api/dto/admin/admin-vacancies-query.dto';
 import { AdminVacanciesResponseDto } from '@api/dto/admin/admin-vacancies-response.dto';
 import { PaginationQueryDto } from '@api/dto/common/pagination-query.dto';
 import { RolesGuard } from '@api/guards/roles.guard';
@@ -78,8 +79,8 @@ export class AdminController {
     description: 'Список вакансий получен',
     type: AdminVacanciesResponseDto,
   })
-  async getVacancies(@Query() query: PaginationQueryDto) {
-    const result = await this.adminService.getVacancies(query);
+  async getVacancies(@Query() query: AdminVacanciesQueryDto) {
+    const result = await this.adminService.getVacancies(query, query.status);
     return this.responseService.success('Список вакансий получен', result);
   }
 

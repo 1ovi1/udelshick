@@ -17,7 +17,53 @@
   padding: 20px;
 }
 
-.hello-box {
-  color: #344054;
+.contacts-cell {
+  display: grid;
+  gap: 2px;
+}
+
+.resume-block {
+  max-height: 58vh;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.resume-section {
+  margin-top: 10px;
+}
+
+.resume-item {
+  padding: 8px 0;
+  border-top: 1px solid #f2f4f7;
+}
+
+.resume-title {
   font-weight: 600;
+  margin: 0;
+}
+
+.resume-period {
+  color: #667085;
+  margin: 2px 0;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+:host ::ng-deep .ant-table-pagination.ant-pagination {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
 }

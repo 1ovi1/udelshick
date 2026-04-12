@@ -17,7 +17,27 @@
   padding: 20px;
 }
 
-.hello-box {
-  color: #344054;
-  font-weight: 600;
+.resume-block {
+  display: grid;
+  gap: 8px;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+:host ::ng-deep .ant-table-pagination.ant-pagination {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
 }

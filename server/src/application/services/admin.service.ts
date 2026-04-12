@@ -3,6 +3,7 @@ import { AdminActivityItem } from '@domain/entities/admin/admin-activity-item';
 import { AdminVacancyItem } from '@domain/entities/admin/admin-vacancy-item';
 import { PaginatedResult } from '@domain/entities/common/paginated-result';
 import { PaginationQuery } from '@domain/entities/common/pagination-query';
+import { VacancyStatus } from '@domain/entities/enums/vacancy-status.enum';
 import { AdminRepository } from '@infrastructure/repository/admin.repository';
 import { Injectable } from '@nestjs/common';
 
@@ -34,8 +35,9 @@ export class AdminService {
 
   async getVacancies(
     query: PaginationQuery,
+    status?: VacancyStatus,
   ): Promise<PaginatedResult<AdminVacancyItem>> {
-    return this.adminRepository.getVacancies(query);
+    return this.adminRepository.getVacancies(query, status);
   }
 
   async publishVacancy(vacancyId: string): Promise<void> {

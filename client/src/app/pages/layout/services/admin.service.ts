@@ -6,6 +6,7 @@ import { AdminActivityItem } from '../models/admin/admin-activity-item.interface
 import { AdminVacancyItem } from '../models/admin/admin-vacancy-item.interface';
 import { ApiResponse } from '../models/admin/api-response.interface';
 import { PaginatedResult } from '../models/admin/paginated-result.interface';
+import { VacancyStatus } from '../models/admin/vacancy-status.type';
 
 @Injectable({
   providedIn: 'root',
@@ -38,8 +39,12 @@ export class AdminDataService {
       .pipe(map(() => void 0));
   }
 
-  getVacancies(page: number, limit: number): Observable<PaginatedResult<AdminVacancyItem>> {
-    const params = this.buildPaginationParams(page, limit);
+  getVacancies(
+    page: number,
+    limit: number,
+    status?: VacancyStatus,
+  ): Observable<PaginatedResult<AdminVacancyItem>> {
+    const params = this.buildPaginationParams(page, limit, status);
 
     return this.http
       .get<
@@ -66,8 +71,14 @@ export class AdminDataService {
       .pipe(map(() => void 0));
   }
 
-  private buildPaginationParams(page: number, limit: number): HttpParams {
-    return new HttpParams().set('page', String(page)).set('limit', String(limit));
+  private buildPaginationParams(page: number, limit: number, status?: VacancyStatus): HttpParams {
+    let params = new HttpParams().set('page', String(page)).set('limit', String(limit));
+
+    if (status) {
+      params = params.set('status', status);
+    }
+
+    return params;
   }
 
   private requireData<T>(response: ApiResponse<T>, endpoint: string): T {

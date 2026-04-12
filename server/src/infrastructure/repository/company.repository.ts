@@ -1,0 +1,595 @@
+import {
+  CreateCompanyVacancyData,
+  ICompanyRepository,
+  InviteCandidateData,
+  UpdateCompanyVacancyData,
+} from '@domain/interfaces/repositories/company-repository.interface';
+import { CompanySkillItem } from '@domain/entities/company/company-skill-item';
+import { CompanyVacancyItem } from '@domain/entities/company/company-vacancy-item';
+import { CompanyCandidateItem } from '@domain/entities/company/company-candidate-item';
+import { CompanyCandidateResume } from '@domain/entities/company/company-candidate-resume';
+import { PaginatedResult } from '@domain/entities/common/paginated-result';
+import { PaginationMeta } from '@domain/entities/common/pagination-meta';
+import { PaginationQuery } from '@domain/entities/common/pagination-query';
+import { VacancyStatus } from '@domain/entities/enums/vacancy-status.enum';
+import { ApplicationStatus } from '@domain/entities/enums/application-status.enum';
+import { CompanyApplicationItem } from '@domain/entities/company/company-application-item';
+import { CompanyProfileEntity } from '@infrastructure/entities/company-entity.profile';
+import { VacancyEntity } from '@infrastructure/entities/vacancy.entity';
+import { SkillEntity } from '@infrastructure/entities/skill.entity';
+import { ApplicationEntity } from '@infrastructure/entities/application.entity';
+import { CandidateProfileEntity } from '@infrastructure/entities/candidate-profile.entity';
+import { CandidateResumeEntity } from '@infrastructure/entities/candidate-resume.entity';
+import { CandidateResumeEducationEntity } from '@infrastructure/entities/candidate-resume-education.entity';
+import { CandidateResumeExperienceEntity } from '@infrastructure/entities/candidate-resume-experience.entity';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
+import { In, Repository } from 'typeorm';
+
+@Injectable()
+export class CompanyRepository implements ICompanyRepository {
+  constructor(
+    @InjectRepository(CompanyProfileEntity)
+    private readonly companyProfileRepository: Repository<CompanyProfileEntity>,
+    @InjectRepository(VacancyEntity)
+    private readonly vacancyRepository: Repository<VacancyEntity>,
+    @InjectRepository(SkillEntity)
+    private readonly skillRepository: Repository<SkillEntity>,
+    @InjectRepository(ApplicationEntity)
+    private readonly applicationRepository: Repository<ApplicationEntity>,
+    @InjectRepository(CandidateProfileEntity)
+    private readonly candidateProfileRepository: Repository<CandidateProfileEntity>,
+    @InjectRepository(CandidateResumeEntity)
+    private readonly candidateResumeRepository: Repository<CandidateResumeEntity>,
+  ) {}
+
+  async listSkills(): Promise<CompanySkillItem[]> {
+    const skills = await this.skillRepository.find({
+      order: { name: 'ASC' },
+    });
+
+    return skills.map((skill) => ({
+      id: skill.id,
+      name: skill.name,
+    }));
+  }
+
+  async createVacancy(
+    authId: string,
+    data: CreateCompanyVacancyData,
+  ): Promise<CompanyVacancyItem> {
+    const company = await this.findCompanyByAuthId(authId);
+    const skills = await this.getSkillsByIds(data.skillIds);
+
+    const vacancy = this.vacancyRepository.create({
+      id: `vacancy-${randomUUID()}`,
+      companyProfileId: company.id,
+      position: data.position,
+      location: data.location,
+      salary: data.salary ?? null,
+      requirements: data.requirements,
+      experienceLevel: data.experienceLevel,
+      status: VacancyStatus.ARCHIVED,
+      publishedAt: undefined,
+      skills,
+    });
+
+    const saved = await this.vacancyRepository.save(vacancy);
+
+    return this.mapVacancy(saved);
+  }
+
+  async updateVacancy(
+    authId: string,
+    vacancyId: string,
+    data: UpdateCompanyVacancyData,
+  ): Promise<CompanyVacancyItem> {
+    const company = await this.findCompanyByAuthId(authId);
+    const vacancy = await this.findCompanyVacancy(company.id, vacancyId);
+
+    if (data.position !== undefined) {
+      vacancy.position = data.position;
+    }
+
+    if (data.location !== undefined) {
+      vacancy.location = data.location;
+    }
+
+    if (data.salary !== undefined) {
+      vacancy.salary = data.salary;
+    }
+
+    if (data.requirements !== undefined) {
+      vacancy.requirements = data.requirements;
+    }
+
+    if (data.experienceLevel !== undefined) {
+      vacancy.experienceLevel = data.experienceLevel;
+    }
+
+    if (data.skillIds !== undefined) {
+      vacancy.skills = await this.getSkillsByIds(data.skillIds);
+    }
+
+    if (vacancy.status === VacancyStatus.PUBLISHED) {
+      vacancy.status = VacancyStatus.PENDING_REVIEW;
+      vacancy.publishedAt = undefined;
+    }
+
+    const saved = await this.vacancyRepository.save(vacancy);
+
+    return this.mapVacancy(saved);
+  }
+
+  async publishVacancyForReview(
+    authId: string,
+    vacancyId: string,
+  ): Promise<void> {
+    const company = await this.findCompanyByAuthId(authId);
+    const vacancy = await this.findCompanyVacancy(company.id, vacancyId);
+
+    vacancy.status = VacancyStatus.PENDING_REVIEW;
+    vacancy.publishedAt = undefined;
+
+    await this.vacancyRepository.save(vacancy);
+  }
+
+  async archiveVacancy(authId: string, vacancyId: string): Promise<void> {
+    const company = await this.findCompanyByAuthId(authId);
+    const vacancy = await this.findCompanyVacancy(company.id, vacancyId);
+
+    vacancy.status = VacancyStatus.ARCHIVED;
+
+    await this.vacancyRepository.save(vacancy);
+  }
+
+  async getCompanyVacancies(
+    authId: string,
+    query: PaginationQuery,
+    status?: VacancyStatus,
+  ): Promise<PaginatedResult<CompanyVacancyItem>> {
+    const company = await this.findCompanyByAuthId(authId);
+    const offset = (query.page - 1) * query.limit;
+
+    const whereCondition: {
+      companyProfileId: string;
+      status?: VacancyStatus;
+    } = {
+      companyProfileId: company.id,
+    };
+
+    if (status !== undefined) {
+      whereCondition.status = status;
+    }
+
+    const [vacancies, total] = await this.vacancyRepository.findAndCount({
+      where: whereCondition,
+      relations: {
+        skills: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      skip: offset,
+      take: query.limit,
+    });
+
+    return {
+      items: vacancies.map((item) => this.mapVacancy(item)),
+      meta: this.buildMeta(query.page, query.limit, total),
+    };
+  }
+
+  async getCandidatesWithResume(
+    query: PaginationQuery,
+  ): Promise<PaginatedResult<CompanyCandidateItem>> {
+    const offset = (query.page - 1) * query.limit;
+
+    const [resumes, total] = await this.candidateResumeRepository.findAndCount({
+      relations: {
+        candidateProfile: {
+          auth: true,
+        },
+        experiences: true,
+        educations: true,
+      },
+      order: {
+        updatedAt: 'DESC',
+      },
+      skip: offset,
+      take: query.limit,
+    });
+
+    const items = resumes.map((resume) => {
+      const candidate = resume.candidateProfile;
+      const firstExperience = this.sortExperiences(resume.experiences)[0];
+      const firstEducation = this.sortEducations(resume.educations)[0];
+
+      return {
+        candidateProfileId: candidate.id,
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
+        profession: resume.profession,
+        location: resume.location,
+        experience: firstExperience
+          ? `${firstExperience.position}, ${firstExperience.companyName}`
+          : 'Не указан',
+        education: firstEducation
+          ? `${firstEducation.degree}, ${firstEducation.institutionName}`
+          : 'Не указано',
+        email: candidate.auth.email,
+        phone: candidate.phone,
+        resumePdfUrl: resume.resumePdfUrl,
+      };
+    });
+
+    return {
+      items,
+      meta: this.buildMeta(query.page, query.limit, total),
+    };
+  }
+
+  async getCandidateResume(
+    candidateProfileId: string,
+  ): Promise<CompanyCandidateResume> {
+    const resume =
+      await this.findResumeByCandidateProfileId(candidateProfileId);
+
+    return this.mapCandidateResume(resume);
+  }
+
+  async inviteCandidate(
+    authId: string,
+    data: InviteCandidateData,
+  ): Promise<void> {
+    const company = await this.findCompanyByAuthId(authId);
+
+    const vacancy = await this.vacancyRepository.findOne({
+      where: {
+        id: data.vacancyId,
+        companyProfileId: company.id,
+      },
+    });
+
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия компании не найдена');
+    }
+
+    if (vacancy.status === VacancyStatus.ARCHIVED) {
+      throw new BadRequestException(
+        'Нельзя приглашать кандидатов на архивную вакансию',
+      );
+    }
+
+    const candidate = await this.candidateProfileRepository.findOne({
+      where: { id: data.candidateProfileId },
+    });
+
+    if (!candidate) {
+      throw new NotFoundException('Кандидат не найден');
+    }
+
+    const resume = await this.findResumeByCandidateProfileId(
+      data.candidateProfileId,
+    );
+
+    const existingApplication = await this.applicationRepository.findOne({
+      where: {
+        candidateProfileId: data.candidateProfileId,
+        vacancyId: data.vacancyId,
+      },
+    });
+
+    if (existingApplication) {
+      existingApplication.status = ApplicationStatus.INVITED;
+      if (!existingApplication.resumePdfUrl) {
+        existingApplication.resumePdfUrl = resume.resumePdfUrl;
+      }
+
+      await this.applicationRepository.save(existingApplication);
+      return;
+    }
+
+    const application = this.applicationRepository.create({
+      id: `application-${randomUUID()}`,
+      candidateProfileId: data.candidateProfileId,
+      vacancyId: data.vacancyId,
+      status: ApplicationStatus.INVITED,
+      resumePdfUrl: resume.resumePdfUrl,
+    });
+
+    await this.applicationRepository.save(application);
+  }
+
+  async getCompanyApplications(
+    authId: string,
+    query: PaginationQuery,
+    status?: ApplicationStatus,
+  ): Promise<PaginatedResult<CompanyApplicationItem>> {
+    const company = await this.findCompanyByAuthId(authId);
+    const offset = (query.page - 1) * query.limit;
+
+    const whereCondition: {
+      vacancy: { companyProfileId: string };
+      status?: ApplicationStatus;
+    } = {
+      vacancy: {
+        companyProfileId: company.id,
+      },
+    };
+
+    if (status !== undefined) {
+      whereCondition.status = status;
+    }
+
+    const [applications, total] = await this.applicationRepository.findAndCount(
+      {
+        where: whereCondition,
+        relations: {
+          candidateProfile: {
+            auth: true,
+          },
+          vacancy: true,
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+        skip: offset,
+        take: query.limit,
+      },
+    );
+
+    const items: CompanyApplicationItem[] = applications.map((application) => ({
+      applicationId: application.id,
+      candidateProfileId: application.candidateProfileId,
+      firstName: application.candidateProfile.firstName,
+      lastName: application.candidateProfile.lastName,
+      vacancyId: application.vacancyId,
+      vacancyPosition: application.vacancy.position,
+      appliedAt: application.createdAt.toISOString(),
+      status: application.status,
+      resumePdfUrl: application.resumePdfUrl ?? null,
+    }));
+
+    return {
+      items,
+      meta: this.buildMeta(query.page, query.limit, total),
+    };
+  }
+
+  async setApplicationStatus(
+    authId: string,
+    applicationId: string,
+    status: ApplicationStatus,
+  ): Promise<void> {
+    const application = await this.findCompanyApplication(
+      authId,
+      applicationId,
+    );
+
+    if (status === ApplicationStatus.INVITED && !application.resumePdfUrl) {
+      const resume = await this.findResumeByCandidateProfileId(
+        application.candidateProfileId,
+      );
+      application.resumePdfUrl = resume.resumePdfUrl;
+    }
+
+    application.status = status;
+
+    await this.applicationRepository.save(application);
+  }
+
+  async getApplicationResume(
+    authId: string,
+    applicationId: string,
+  ): Promise<CompanyCandidateResume> {
+    const application = await this.findCompanyApplication(
+      authId,
+      applicationId,
+    );
+
+    const resume = await this.findResumeByCandidateProfileId(
+      application.candidateProfileId,
+    );
+
+    return this.mapCandidateResume(resume);
+  }
+
+  private async findCompanyByAuthId(
+    authId: string,
+  ): Promise<CompanyProfileEntity> {
+    const company = await this.companyProfileRepository.findOne({
+      where: { authId },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Профиль компании не найден');
+    }
+
+    return company;
+  }
+
+  private async findCompanyVacancy(
+    companyProfileId: string,
+    vacancyId: string,
+  ): Promise<VacancyEntity> {
+    const vacancy = await this.vacancyRepository.findOne({
+      where: {
+        id: vacancyId,
+        companyProfileId,
+      },
+      relations: {
+        skills: true,
+      },
+    });
+
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия компании не найдена');
+    }
+
+    return vacancy;
+  }
+
+  private async getSkillsByIds(skillIds: string[]): Promise<SkillEntity[]> {
+    if (skillIds.length === 0) {
+      return [];
+    }
+
+    const uniqueIds = [...new Set(skillIds)];
+    const skills = await this.skillRepository.findBy({
+      id: In(uniqueIds),
+    });
+
+    if (skills.length !== uniqueIds.length) {
+      throw new BadRequestException('Часть навыков не найдена');
+    }
+
+    return skills;
+  }
+
+  private async findResumeByCandidateProfileId(
+    candidateProfileId: string,
+  ): Promise<CandidateResumeEntity> {
+    const resume = await this.candidateResumeRepository.findOne({
+      where: { candidateProfileId },
+      relations: {
+        candidateProfile: {
+          auth: true,
+        },
+        experiences: true,
+        educations: true,
+        skills: true,
+      },
+    });
+
+    if (!resume) {
+      throw new NotFoundException('Резюме кандидата не найдено');
+    }
+
+    return resume;
+  }
+
+  private async findCompanyApplication(
+    authId: string,
+    applicationId: string,
+  ): Promise<ApplicationEntity> {
+    const company = await this.findCompanyByAuthId(authId);
+
+    const application = await this.applicationRepository.findOne({
+      where: {
+        id: applicationId,
+        vacancy: {
+          companyProfileId: company.id,
+        },
+      },
+      relations: {
+        vacancy: true,
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Отклик не найден');
+    }
+
+    return application;
+  }
+
+  private mapVacancy(vacancy: VacancyEntity): CompanyVacancyItem {
+    return {
+      id: vacancy.id,
+      position: vacancy.position,
+      location: vacancy.location,
+      salary: vacancy.salary ?? null,
+      requirements: vacancy.requirements,
+      experienceLevel: vacancy.experienceLevel,
+      status: vacancy.status,
+      publishedAt: vacancy.publishedAt
+        ? vacancy.publishedAt.toISOString()
+        : null,
+      createdAt: vacancy.createdAt.toISOString(),
+      skills: (vacancy.skills ?? []).map((skill) => ({
+        id: skill.id,
+        name: skill.name,
+      })),
+    };
+  }
+
+  private mapCandidateResume(
+    resume: CandidateResumeEntity,
+  ): CompanyCandidateResume {
+    const candidate = resume.candidateProfile;
+
+    return {
+      candidateProfileId: candidate.id,
+      firstName: candidate.firstName,
+      lastName: candidate.lastName,
+      email: candidate.auth.email,
+      phone: candidate.phone,
+      profession: resume.profession,
+      location: resume.location,
+      expectedSalary: resume.expectedSalary,
+      about: resume.about,
+      resumePdfUrl: resume.resumePdfUrl,
+      experiences: this.sortExperiences(resume.experiences).map((item) => ({
+        id: item.id,
+        companyName: item.companyName,
+        position: item.position,
+        period: item.period,
+        description: item.description,
+        orderIndex: item.orderIndex,
+      })),
+      educations: this.sortEducations(resume.educations).map((item) => ({
+        id: item.id,
+        institutionName: item.institutionName,
+        studyPeriod: item.studyPeriod,
+        degree: item.degree,
+        specialization: item.specialization,
+        orderIndex: item.orderIndex,
+      })),
+      skills: (resume.skills ?? []).map((skill) => ({
+        id: skill.id,
+        name: skill.name,
+      })),
+    };
+  }
+
+  private sortExperiences(
+    items?: CandidateResumeExperienceEntity[],
+  ): CandidateResumeExperienceEntity[] {
+    if (!items) {
+      return [];
+    }
+
+    return [...items].sort((a, b) => a.orderIndex - b.orderIndex);
+  }
+
+  private sortEducations(
+    items?: CandidateResumeEducationEntity[],
+  ): CandidateResumeEducationEntity[] {
+    if (!items) {
+      return [];
+    }
+
+    return [...items].sort((a, b) => a.orderIndex - b.orderIndex);
+  }
+
+  private buildMeta(
+    page: number,
+    limit: number,
+    total: number,
+  ): PaginationMeta {
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    return {
+      page,
+      limit,
+      total,
+      totalPages,
+    };
+  }
+}

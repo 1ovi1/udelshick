@@ -1,1 +1,1 @@
-export type AdminVacancyTab = 'all' | 'published' | 'archived';
+export type AdminVacancyTab = 'all' | 'pending_review' | 'published' | 'archived';

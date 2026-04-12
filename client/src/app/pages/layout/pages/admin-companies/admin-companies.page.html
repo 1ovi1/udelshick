@@ -2,33 +2,18 @@
   <h1 class="page-title">Вакансии</h1>
 
   <nz-content class="page-content">
-    <div class="filter-buttons">
-      <button
-        nz-button
-        [nzType]="activeTab() === 'all' ? 'primary' : 'default'"
-        (click)="setTab('all')"
-      >
-        Все
-      </button>
-      <button
-        nz-button
-        [nzType]="activeTab() === 'published' ? 'primary' : 'default'"
-        (click)="setTab('published')"
-      >
-        Опубликованные
-      </button>
-      <button
-        nz-button
-        [nzType]="activeTab() === 'archived' ? 'primary' : 'default'"
-        (click)="setTab('archived')"
-      >
-        В архиве
-      </button>
-    </div>
+    <nz-tabs
+      [nzSelectedIndex]="selectedTabIndex()"
+      (nzSelectedIndexChange)="onTabIndexChange($event)"
+    >
+      @for (tab of tabs; track tab.key) {
+        <nz-tab [nzTitle]="tab.title"></nz-tab>
+      }
+    </nz-tabs>
 
     <nz-table
       #vacanciesTable
-      [nzData]="displayedVacancies()"
+      [nzData]="vacancies()"
       [nzFrontPagination]="false"
       [nzTotal]="total()"
       [nzPageIndex]="pageIndex()"
@@ -67,7 +52,7 @@
                   [nzLoading]="isActionLoading(item.id)"
                   (click)="publish(item.id)"
                 >
-                  Одобрить
+                  Опубликовать
                 </button>
               }
 

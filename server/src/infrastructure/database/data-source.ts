@@ -6,6 +6,9 @@ import { CompanyProfileEntity } from '../entities/company-entity.profile';
 import { VacancyEntity } from '../entities/vacancy.entity';
 import { SkillEntity } from '../entities/skill.entity';
 import { ApplicationEntity } from '../entities/application.entity';
+import { CandidateResumeEntity } from '../entities/candidate-resume.entity';
+import { CandidateResumeExperienceEntity } from '../entities/candidate-resume-experience.entity';
+import { CandidateResumeEducationEntity } from '../entities/candidate-resume-education.entity';
 
 const databaseUrl =
   process.env.DATABASE_URL ||
@@ -21,6 +24,9 @@ export default new DataSource({
     VacancyEntity,
     SkillEntity,
     ApplicationEntity,
+    CandidateResumeEntity,
+    CandidateResumeExperienceEntity,
+    CandidateResumeEducationEntity,
   ],
   migrations: ['src/infrastructure/database/migrations/*.ts'],
   synchronize: false,

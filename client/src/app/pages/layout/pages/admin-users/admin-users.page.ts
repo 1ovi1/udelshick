@@ -5,13 +5,27 @@ import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { AdminDataService } from '../../services/admin.service';
 import { AdminActivityItem } from '../../models/admin/admin-activity-item.interface';
 import { AdminUsersTab } from '../../models/admin/admin-users-tab.type';
+import { ADMIN_USERS_TABS } from './constants/admin-users-tab-view.constant';
+import { formatDateRu } from '../../utils/date-format.util';
+import {
+  toAdminActivityStatusColor,
+  toAdminActivityStatusLabel,
+} from '../../utils/admin-activity-status.util';
 
 @Component({
   selector: 'app-admin-users-page',
-  imports: [NzLayoutModule, NzTableModule, NzTagModule, NzButtonModule, NzPopconfirmModule],
+  imports: [
+    NzLayoutModule,
+    NzTableModule,
+    NzTagModule,
+    NzButtonModule,
+    NzPopconfirmModule,
+    NzTabsModule,
+  ],
   templateUrl: './admin-users.page.html',
   styleUrl: './admin-users.page.scss',
 })
@@ -21,11 +35,22 @@ export class AdminUsersPage implements OnInit {
 
   protected readonly isLoading = signal(false);
   protected readonly users = signal<AdminActivityItem[]>([]);
+  protected readonly tabs = ADMIN_USERS_TABS;
+  protected readonly formatDate = formatDateRu;
+  protected readonly toStatusLabel = toAdminActivityStatusLabel;
+  protected readonly toStatusColor = toAdminActivityStatusColor;
   protected readonly pageIndex = signal(1);
   protected readonly pageSize = signal(10);
   protected readonly total = signal(0);
   protected readonly activeTab = signal<AdminUsersTab>('all');
   protected readonly deletingAuthId = signal<string | null>(null);
+
+  protected readonly selectedTabIndex = computed(() => {
+    const tab = this.activeTab();
+    const index = this.tabs.findIndex((item) => item.key === tab);
+
+    return index >= 0 ? index : 0;
+  });
 
   protected readonly displayedUsers = computed(() => {
     const tab = this.activeTab();
@@ -59,7 +84,13 @@ export class AdminUsersPage implements OnInit {
     this.loadUsers();
   }
 
-  protected setTab(tab: AdminUsersTab): void {
+  protected onTabIndexChange(index: number): void {
+    const tab = this.tabs[index]?.key;
+
+    if (!tab || tab === this.activeTab()) {
+      return;
+    }
+
     this.activeTab.set(tab);
   }
 
@@ -86,24 +117,6 @@ export class AdminUsersPage implements OnInit {
 
   protected isDeleting(authId: string): boolean {
     return this.deletingAuthId() === authId;
-  }
-
-  protected formatDate(value: string): string {
-    const date = new Date(value);
-
-    return new Intl.DateTimeFormat('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }).format(date);
-  }
-
-  protected toStatusLabel(status: 'candidate' | 'company'): string {
-    return status === 'candidate' ? 'Кандидат' : 'Компания';
-  }
-
-  protected toStatusColor(status: 'candidate' | 'company'): 'green' | 'default' {
-    return status === 'candidate' ? 'green' : 'default';
   }
 
   private loadUsers(): void {

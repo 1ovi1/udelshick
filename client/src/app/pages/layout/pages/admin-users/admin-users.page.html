@@ -2,29 +2,14 @@
   <h1 class="page-title">Пользователи</h1>
 
   <nz-content class="page-content">
-    <div class="filter-buttons">
-      <button
-        nz-button
-        [nzType]="activeTab() === 'all' ? 'primary' : 'default'"
-        (click)="setTab('all')"
-      >
-        Все
-      </button>
-      <button
-        nz-button
-        [nzType]="activeTab() === 'candidate' ? 'primary' : 'default'"
-        (click)="setTab('candidate')"
-      >
-        Кандидаты
-      </button>
-      <button
-        nz-button
-        [nzType]="activeTab() === 'company' ? 'primary' : 'default'"
-        (click)="setTab('company')"
-      >
-        Компании
-      </button>
-    </div>
+    <nz-tabs
+      [nzSelectedIndex]="selectedTabIndex()"
+      (nzSelectedIndexChange)="onTabIndexChange($event)"
+    >
+      @for (tab of tabs; track tab.key) {
+        <nz-tab [nzTitle]="tab.title"></nz-tab>
+      }
+    </nz-tabs>
 
     <nz-table
       #usersTable

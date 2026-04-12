@@ -3,11 +3,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { AdminDataService } from '../../services/admin.service';
 import { AdminDashboardMetrics } from '../../models/admin/admin-dashboard-metrics.interface';
-import { AdminActivityStatus } from '../../models/admin/admin-activity-status.type';
 import { AdminActivityItem } from '../../models/admin/admin-activity-item.interface';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import {
+  toAdminActivityStatusColor,
+  toAdminActivityStatusLabel,
+} from '../../utils/admin-activity-status.util';
+import { formatDateTimeRu } from '../../utils/date-format.util';
 
 @Component({
   selector: 'app-admin-statistics-page',
@@ -20,6 +24,9 @@ export class AdminStatisticsPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isLoading = signal(false);
+  protected readonly toStatusLabel = toAdminActivityStatusLabel;
+  protected readonly toStatusColor = toAdminActivityStatusColor;
+  protected readonly formatDateTime = formatDateTimeRu;
   protected readonly metrics = signal<AdminDashboardMetrics>({
     candidatesCount: 0,
     companiesCount: 0,
@@ -46,27 +53,6 @@ export class AdminStatisticsPage implements OnInit {
     this.pageIndex.set(nextPage);
     this.pageSize.set(nextPageSize);
     this.loadDashboard();
-  }
-
-  protected toStatusLabel(status: AdminActivityStatus): string {
-    return status === 'candidate' ? 'Кандидат' : 'Компания';
-  }
-
-  protected toStatusColor(status: AdminActivityStatus): 'green' | 'default' {
-    return status === 'candidate' ? 'green' : 'default';
-  }
-
-  protected formatDateTime(value: string): string {
-    const date = new Date(value);
-
-    return new Intl.DateTimeFormat('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(date);
   }
 
   private loadDashboard(): void {

@@ -6,6 +6,9 @@ import { CompanyProfileEntity } from '@infrastructure/entities/company-entity.pr
 import { VacancyEntity } from '@infrastructure/entities/vacancy.entity';
 import { SkillEntity } from '@infrastructure/entities/skill.entity';
 import { ApplicationEntity } from '@infrastructure/entities/application.entity';
+import { CandidateResumeEntity } from '@infrastructure/entities/candidate-resume.entity';
+import { CandidateResumeExperienceEntity } from '@infrastructure/entities/candidate-resume-experience.entity';
+import { CandidateResumeEducationEntity } from '@infrastructure/entities/candidate-resume-education.entity';
 
 export const databaseProviders = [
   {
@@ -21,6 +24,9 @@ export const databaseProviders = [
           VacancyEntity,
           SkillEntity,
           ApplicationEntity,
+          CandidateResumeEntity,
+          CandidateResumeExperienceEntity,
+          CandidateResumeEducationEntity,
         ],
         synchronize: process.env.NODE_ENV !== 'production',
         logging: process.env.NODE_ENV === 'development',
