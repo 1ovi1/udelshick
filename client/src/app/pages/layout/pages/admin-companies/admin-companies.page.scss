@@ -1,23 +1,27 @@
 .page {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   padding: 24px;
 }
 
 .page-title {
-  margin: 0;
-  font-size: 28px;
   color: #101828;
 }
 
 .page-content {
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #eaecf0;
   border-radius: 12px;
   padding: 20px;
 }
 
-.hello-box {
-  color: #344054;
-  font-weight: 600;
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep .ant-table-pagination.ant-pagination {
+  margin-bottom: 0;
 }

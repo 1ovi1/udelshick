@@ -71,12 +71,13 @@ export const LAYOUT_ROUTES: Routes = [
         data: { roles: ['admin'] },
       },
       {
-        path: 'admin/companies',
+        path: 'admin/vacancies',
         loadComponent: () =>
-          import('./pages/admin-companies/admin-companies.page').then((m) => m.AdminCompaniesPage),
+          import('./pages/admin-companies/admin-companies.page').then((m) => m.AdminVacanciesPage),
         canActivate: [roleTabGuard],
         data: { roles: ['admin'] },
       },
+      { path: 'admin/companies', pathMatch: 'full', redirectTo: 'admin/vacancies' },
       {
         path: 'admin/users',
         loadComponent: () =>

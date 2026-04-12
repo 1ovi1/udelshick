@@ -1,6 +1,14 @@
-import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { AuthEntity } from './auth.entity';
 import { SoftDeletableEntity } from './base/soft-deletable.entity';
+import { ApplicationEntity } from './application.entity';
 
 @Entity('candidate_profiles')
 export class CandidateProfileEntity extends SoftDeletableEntity {
@@ -10,7 +18,9 @@ export class CandidateProfileEntity extends SoftDeletableEntity {
   @Column({ unique: true })
   authId: string;
 
-  @OneToOne(() => AuthEntity, (auth) => auth.candidateProfile)
+  @OneToOne(() => AuthEntity, (auth) => auth.candidateProfile, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'authId' })
   auth: AuthEntity;
 
@@ -22,4 +32,10 @@ export class CandidateProfileEntity extends SoftDeletableEntity {
 
   @Column()
   phone: string;
+
+  @OneToMany(
+    () => ApplicationEntity,
+    (application) => application.candidateProfile,
+  )
+  applications?: ApplicationEntity[];
 }

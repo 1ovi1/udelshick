@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CompanyProfileEntity } from '@infrastructure/entities/company-entity.profile';
 import { CandidateProfileEntity } from '@infrastructure/entities/candidate-profile.entity';
 import { DATABASE_URL } from '@constants';
+import { VacancyEntity } from '@infrastructure/entities/vacancy.entity';
+import { SkillEntity } from '@infrastructure/entities/skill.entity';
+import { ApplicationEntity } from '@infrastructure/entities/application.entity';
 
 @Module({
   imports: [
@@ -15,7 +18,14 @@ import { DATABASE_URL } from '@constants';
       // password: process.env.POSTGRES_PASSWORD ?? '',
       // database: process.env.POSTGRES_DB,
       url: DATABASE_URL,
-      entities: [AuthEntity, CompanyProfileEntity, CandidateProfileEntity],
+      entities: [
+        AuthEntity,
+        CompanyProfileEntity,
+        CandidateProfileEntity,
+        VacancyEntity,
+        SkillEntity,
+        ApplicationEntity,
+      ],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV === 'development',
       ssl:
@@ -27,6 +37,9 @@ import { DATABASE_URL } from '@constants';
       AuthEntity,
       CompanyProfileEntity,
       CandidateProfileEntity,
+      VacancyEntity,
+      SkillEntity,
+      ApplicationEntity,
     ]),
   ],
   exports: [TypeOrmModule],
