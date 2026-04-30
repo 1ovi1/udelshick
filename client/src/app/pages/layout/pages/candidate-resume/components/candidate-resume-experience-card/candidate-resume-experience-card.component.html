@@ -1,0 +1,15 @@
+<nz-card class="experience-card" nzSize="small">
+  <div class="experience-card__header">
+    <div>
+      <p class="experience-card__position">{{ item().position }}</p>
+      <p class="experience-card__company">{{ item().companyName }}</p>
+    </div>
+
+    @if (showRemove()) {
+      <button nz-button nzType="link" nzDanger (click)="removeItem()">Удалить</button>
+    }
+  </div>
+
+  <p class="experience-card__period">{{ item().period }}</p>
+  <p class="experience-card__description">{{ item().description }}</p>
+</nz-card>

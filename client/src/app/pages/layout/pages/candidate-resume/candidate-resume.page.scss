@@ -1,6 +1,6 @@
 .page {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   padding: 24px;
 }
 
@@ -15,9 +15,171 @@
   border: 1px solid #eaecf0;
   border-radius: 12px;
   padding: 20px;
+  display: grid;
+  gap: 16px;
 }
 
-.hello-box {
-  color: #344054;
-  font-weight: 600;
+.steps {
+  margin-bottom: 6px;
+}
+
+.step-host {
+  min-height: 420px;
+}
+
+.step-form {
+  display: grid;
+  gap: 2px;
+}
+
+.step-scroll-container {
+  max-height: 430px;
+  overflow: auto;
+  padding-right: 4px;
+  display: grid;
+  gap: 12px;
+}
+
+.add-button {
+  width: 100%;
+}
+
+.cards-list {
+  display: grid;
+  gap: 10px;
+}
+
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-skills-block {
+  margin-top: 18px;
+}
+
+.selected-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.selected-skills-list {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #eff8ff;
+  color: #175cd3;
+}
+
+.chip-remove-button {
+  border: none;
+  background: transparent;
+  color: #175cd3;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+}
+
+.review-layout {
+  display: grid;
+  gap: 12px;
+}
+
+.review-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.review-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.review-grid p,
+.review-about p {
+  margin: 4px 0 0;
+}
+
+.review-label {
+  color: #667085;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.review-about {
+  margin-top: 12px;
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.skills-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-scroll-list {
+  max-height: 60vh;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.step-actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.step-actions--end {
+  justify-content: flex-end;
+}
+
+.loading-box,
+.empty-note {
+  color: #667085;
+}
+
+:host ::ng-deep .ant-input-number {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

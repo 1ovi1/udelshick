@@ -6,31 +6,16 @@ import { CompanyVacancyItem } from '@domain/entities/company/company-vacancy-ite
 import { PaginatedResult } from '@domain/entities/common/paginated-result';
 import { PaginationQuery } from '@domain/entities/common/pagination-query';
 import { ApplicationStatus } from '@domain/entities/enums/application-status.enum';
-import { ExperienceLevel } from '@domain/entities/enums/experience-level.enum';
 import { VacancyStatus } from '@domain/entities/enums/vacancy-status.enum';
+import { CreateCompanyVacancyData } from './company/create-company-vacancy-data.interface';
+import { InviteCandidateData } from './company/invite-candidate-data.interface';
+import { UpdateCompanyVacancyData } from './company/update-company-vacancy-data.interface';
 
-export interface CreateCompanyVacancyData {
-  position: string;
-  location: string;
-  salary: number | null;
-  requirements: string;
-  experienceLevel: ExperienceLevel;
-  skillIds: string[];
-}
-
-export interface UpdateCompanyVacancyData {
-  position?: string;
-  location?: string;
-  salary?: number | null;
-  requirements?: string;
-  experienceLevel?: ExperienceLevel;
-  skillIds?: string[];
-}
-
-export interface InviteCandidateData {
-  candidateProfileId: string;
-  vacancyId: string;
-}
+export type {
+  CreateCompanyVacancyData,
+  InviteCandidateData,
+  UpdateCompanyVacancyData,
+};
 
 export interface ICompanyRepository {
   listSkills(): Promise<CompanySkillItem[]>;
@@ -50,6 +35,10 @@ export interface ICompanyRepository {
     query: PaginationQuery,
     status?: VacancyStatus,
   ): Promise<PaginatedResult<CompanyVacancyItem>>;
+  getCompanyVacancy(
+    authId: string,
+    vacancyId: string,
+  ): Promise<CompanyVacancyItem>;
   getCandidatesWithResume(
     query: PaginationQuery,
   ): Promise<PaginatedResult<CompanyCandidateItem>>;

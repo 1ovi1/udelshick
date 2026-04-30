@@ -1,0 +1,14 @@
+<nz-card class="education-card" nzSize="small">
+  <div class="education-card__header">
+    <div>
+      <p class="education-card__title">{{ item().institutionName }}</p>
+      <p class="education-card__meta">{{ item().degree }} · {{ item().specialization }}</p>
+    </div>
+
+    @if (showRemove()) {
+      <button nz-button nzType="link" nzDanger (click)="removeItem()">Удалить</button>
+    }
+  </div>
+
+  <p class="education-card__period">{{ item().studyPeriod }}</p>
+</nz-card>

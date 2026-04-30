@@ -120,13 +120,24 @@
         <nz-form-item>
           <nz-form-label [nzRequired]="true" nzFor="userPassword">Пароль</nz-form-label>
           <nz-form-control [nzErrorTip]="passwordError">
-            <input
-              nz-input
-              id="userPassword"
-              type="password"
-              formControlName="password"
-              placeholder="Пароль"
-            />
+            <nz-input-group [nzSuffix]="userPasswordSuffix">
+              <input
+                nz-input
+                id="userPassword"
+                [type]="showUserPassword() ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Пароль"
+              />
+            </nz-input-group>
+
+            <ng-template #userPasswordSuffix>
+              <span
+                nz-icon
+                class="password-toggle-icon"
+                [nzType]="showUserPassword() ? 'eye-invisible' : 'eye'"
+                (click)="toggleUserPasswordVisibility()"
+              ></span>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
@@ -135,13 +146,24 @@
             >Подтвердите пароль</nz-form-label
           >
           <nz-form-control [nzErrorTip]="repassError">
-            <input
-              nz-input
-              id="userPasswordConfirm"
-              type="password"
-              formControlName="confirmPassword"
-              placeholder="Пароль"
-            />
+            <nz-input-group [nzSuffix]="userConfirmPasswordSuffix">
+              <input
+                nz-input
+                id="userPasswordConfirm"
+                [type]="showUserConfirmPassword() ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                placeholder="Пароль"
+              />
+            </nz-input-group>
+
+            <ng-template #userConfirmPasswordSuffix>
+              <span
+                nz-icon
+                class="password-toggle-icon"
+                [nzType]="showUserConfirmPassword() ? 'eye-invisible' : 'eye'"
+                (click)="toggleUserConfirmPasswordVisibility()"
+              ></span>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
@@ -233,13 +255,24 @@
         <nz-form-item>
           <nz-form-label [nzRequired]="true" nzFor="companyPassword">Пароль</nz-form-label>
           <nz-form-control [nzErrorTip]="passwordError">
-            <input
-              nz-input
-              id="companyPassword"
-              type="password"
-              formControlName="password"
-              placeholder="Пароль"
-            />
+            <nz-input-group [nzSuffix]="companyPasswordSuffix">
+              <input
+                nz-input
+                id="companyPassword"
+                [type]="showCompanyPassword() ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Пароль"
+              />
+            </nz-input-group>
+
+            <ng-template #companyPasswordSuffix>
+              <span
+                nz-icon
+                class="password-toggle-icon"
+                [nzType]="showCompanyPassword() ? 'eye-invisible' : 'eye'"
+                (click)="toggleCompanyPasswordVisibility()"
+              ></span>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
@@ -248,13 +281,24 @@
             >Подтвердите пароль</nz-form-label
           >
           <nz-form-control [nzErrorTip]="repassError">
-            <input
-              nz-input
-              id="companyPasswordConfirm"
-              type="password"
-              formControlName="confirmPassword"
-              placeholder="Пароль"
-            />
+            <nz-input-group [nzSuffix]="companyConfirmPasswordSuffix">
+              <input
+                nz-input
+                id="companyPasswordConfirm"
+                [type]="showCompanyConfirmPassword() ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                placeholder="Пароль"
+              />
+            </nz-input-group>
+
+            <ng-template #companyConfirmPasswordSuffix>
+              <span
+                nz-icon
+                class="password-toggle-icon"
+                [nzType]="showCompanyConfirmPassword() ? 'eye-invisible' : 'eye'"
+                (click)="toggleCompanyConfirmPasswordVisibility()"
+              ></span>
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 

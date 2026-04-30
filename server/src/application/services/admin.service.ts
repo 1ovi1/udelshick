@@ -1,4 +1,5 @@
 import { AdminDashboardData } from '@domain/entities/admin/admin-dashboard-data';
+import { AdminVacancyDetails } from '@domain/entities/admin/admin-vacancy-details';
 import { AdminActivityItem } from '@domain/entities/admin/admin-activity-item';
 import { AdminVacancyItem } from '@domain/entities/admin/admin-vacancy-item';
 import { PaginatedResult } from '@domain/entities/common/paginated-result';
@@ -38,6 +39,10 @@ export class AdminService {
     status?: VacancyStatus,
   ): Promise<PaginatedResult<AdminVacancyItem>> {
     return this.adminRepository.getVacancies(query, status);
+  }
+
+  async getVacancyDetails(vacancyId: string): Promise<AdminVacancyDetails> {
+    return this.adminRepository.getVacancyDetails(vacancyId);
   }
 
   async publishVacancy(vacancyId: string): Promise<void> {

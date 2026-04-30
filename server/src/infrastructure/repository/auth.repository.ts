@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from '@domain/entities/enums/role.enum';
+import { AuthMapper } from './mappers/auth.mapper';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository {
@@ -16,7 +17,7 @@ export class AuthRepository implements IAuthRepository {
   async create(data: Partial<AuthUser>): Promise<AuthUser> {
     const entity = this.repo.create(data);
     const saved = await this.repo.save(entity);
-    return this.mapToDomain(saved);
+    return AuthMapper.toDomain(saved);
   }
 
   async findByEmail(
@@ -32,7 +33,7 @@ export class AuthRepository implements IAuthRepository {
     }
 
     const found = await qb.getOne();
-    return found ? this.mapToDomain(found) : null;
+    return found ? AuthMapper.toDomain(found) : null;
   }
 
   async findById(id: string, withPassword = false): Promise<AuthUser | null> {
@@ -45,7 +46,7 @@ export class AuthRepository implements IAuthRepository {
     }
 
     const found = await qb.getOne();
-    return found ? this.mapToDomain(found) : null;
+    return found ? AuthMapper.toDomain(found) : null;
   }
 
   async findFirstByRole(role: Role): Promise<AuthUser | null> {
@@ -54,15 +55,6 @@ export class AuthRepository implements IAuthRepository {
       .where('auth.role = :role', { role })
       .getOne();
 
-    return found ? this.mapToDomain(found) : null;
-  }
-
-  private mapToDomain(entity: AuthEntity): AuthUser {
-    return {
-      id: entity.id,
-      email: entity.email,
-      password: entity.password || '',
-      role: entity.role,
-    };
+    return found ? AuthMapper.toDomain(found) : null;
   }
 }

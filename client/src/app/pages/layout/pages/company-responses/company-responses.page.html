@@ -7,7 +7,7 @@
       (nzSelectedIndexChange)="onTabIndexChange($event)"
     >
       @for (tab of tabs; track tab.key) {
-        <nz-tab [nzTitle]="tab.title"></nz-tab>
+        <nz-tab [nzTitle]="tab.title" />
       }
     </nz-tabs>
 
@@ -40,7 +40,7 @@
             <td>{{ item.vacancyPosition }}</td>
             <td>{{ formatDate(item.appliedAt) }}</td>
             <td>
-              <nz-tag [nzColor]="toStatusColor(item.status)">{{
+              <nz-tag [nzBordered]="false" [nzColor]="toStatusColor(item.status)">{{
                 toStatusLabel(item.status)
               }}</nz-tag>
             </td>
@@ -107,7 +107,7 @@
           @if (resume.skills.length > 0) {
             <div class="skills-list">
               @for (skill of resume.skills; track skill.id) {
-                <nz-tag>{{ skill.name }}</nz-tag>
+                <nz-tag [nzBordered]="false">{{ skill.name }}</nz-tag>
               }
             </div>
           }

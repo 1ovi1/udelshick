@@ -5,9 +5,16 @@ import { DatabaseModule } from '@infrastructure/database/database.module';
 import { AuthModule } from '@application/auth/auth.module';
 import { AdminModule } from '@application/admin/admin.module';
 import { CompanyModule } from '@application/company/company.module';
+import { CandidateModule } from '@application/candidate/candidate.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, AdminModule, CompanyModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    AdminModule,
+    CompanyModule,
+    CandidateModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

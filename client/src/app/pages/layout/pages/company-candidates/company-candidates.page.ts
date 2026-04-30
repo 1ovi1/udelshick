@@ -1,28 +1,34 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { CompanyCandidateItem } from '../../models/company/company-candidate-item.interface';
 import { CompanyCandidateResume } from '../../models/company/company-candidate-resume.interface';
 import { CompanyVacancyItem } from '../../models/company/company-vacancy-item.interface';
 import { CompanyDataService } from '../../services/company.service';
+import { CandidateCardComponent } from './components/candidate-card/candidate-card.component';
 
 @Component({
   selector: 'app-company-candidates-page',
   imports: [
     NzLayoutModule,
-    NzTableModule,
     NzButtonModule,
     NzModalModule,
     NzTagModule,
     NzFormModule,
     NzSelectModule,
+    NzInputModule,
+    NzIconModule,
+    NzPaginationModule,
+    CandidateCardComponent,
     ReactiveFormsModule,
   ],
   templateUrl: './company-candidates.page.html',
@@ -38,6 +44,25 @@ export class CompanyCandidatesPage implements OnInit {
   protected readonly pageIndex = signal(1);
   protected readonly pageSize = signal(10);
   protected readonly total = signal(0);
+  protected readonly searchQuery = signal('');
+
+  protected readonly filteredCandidates = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+
+    if (!query) {
+      return this.candidates();
+    }
+
+    return this.candidates().filter((item) => {
+      const fullName = this.fullName(item).toLowerCase();
+
+      return (
+        fullName.includes(query) ||
+        item.profession.toLowerCase().includes(query) ||
+        item.location.toLowerCase().includes(query)
+      );
+    });
+  });
 
   protected readonly isResumeModalOpen = signal(false);
   protected readonly isResumeLoading = signal(false);
@@ -59,17 +84,31 @@ export class CompanyCandidatesPage implements OnInit {
     this.loadSelectableVacancies();
   }
 
-  protected onQueryParamsChange(params: NzTableQueryParams): void {
-    const nextPage = params.pageIndex;
-    const nextPageSize = params.pageSize;
-
-    if (nextPage === this.pageIndex() && nextPageSize === this.pageSize()) {
+  protected onPageIndexChange(nextPage: number): void {
+    if (nextPage === this.pageIndex()) {
       return;
     }
 
     this.pageIndex.set(nextPage);
-    this.pageSize.set(nextPageSize);
     this.loadCandidates();
+  }
+
+  protected onPageSizeChange(nextPageSize: number): void {
+    if (nextPageSize === this.pageSize()) {
+      return;
+    }
+
+    this.pageSize.set(nextPageSize);
+    this.pageIndex.set(1);
+    this.loadCandidates();
+  }
+
+  protected onSearchChange(value: string): void {
+    this.searchQuery.set(value);
+  }
+
+  protected clearSearch(): void {
+    this.searchQuery.set('');
   }
 
   protected openResume(candidateProfileId: string): void {

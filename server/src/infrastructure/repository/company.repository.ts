@@ -1,9 +1,7 @@
-import {
-  CreateCompanyVacancyData,
-  ICompanyRepository,
-  InviteCandidateData,
-  UpdateCompanyVacancyData,
-} from '@domain/interfaces/repositories/company-repository.interface';
+import { ICompanyRepository } from '@domain/interfaces/repositories/company-repository.interface';
+import { CreateCompanyVacancyData } from '@domain/interfaces/repositories/company/create-company-vacancy-data.interface';
+import { InviteCandidateData } from '@domain/interfaces/repositories/company/invite-candidate-data.interface';
+import { UpdateCompanyVacancyData } from '@domain/interfaces/repositories/company/update-company-vacancy-data.interface';
 import { CompanySkillItem } from '@domain/entities/company/company-skill-item';
 import { CompanyVacancyItem } from '@domain/entities/company/company-vacancy-item';
 import { CompanyCandidateItem } from '@domain/entities/company/company-candidate-item';
@@ -14,14 +12,13 @@ import { PaginationQuery } from '@domain/entities/common/pagination-query';
 import { VacancyStatus } from '@domain/entities/enums/vacancy-status.enum';
 import { ApplicationStatus } from '@domain/entities/enums/application-status.enum';
 import { CompanyApplicationItem } from '@domain/entities/company/company-application-item';
+import { CompanyDomainService } from '@domain/services/company-domain.service';
 import { CompanyProfileEntity } from '@infrastructure/entities/company-entity.profile';
 import { VacancyEntity } from '@infrastructure/entities/vacancy.entity';
 import { SkillEntity } from '@infrastructure/entities/skill.entity';
 import { ApplicationEntity } from '@infrastructure/entities/application.entity';
 import { CandidateProfileEntity } from '@infrastructure/entities/candidate-profile.entity';
 import { CandidateResumeEntity } from '@infrastructure/entities/candidate-resume.entity';
-import { CandidateResumeEducationEntity } from '@infrastructure/entities/candidate-resume-education.entity';
-import { CandidateResumeExperienceEntity } from '@infrastructure/entities/candidate-resume-experience.entity';
 import {
   BadRequestException,
   Injectable,
@@ -30,6 +27,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { In, Repository } from 'typeorm';
+import { CompanyRepositoryMapper } from './mappers/company-repository.mapper';
 
 @Injectable()
 export class CompanyRepository implements ICompanyRepository {
@@ -46,6 +44,7 @@ export class CompanyRepository implements ICompanyRepository {
     private readonly candidateProfileRepository: Repository<CandidateProfileEntity>,
     @InjectRepository(CandidateResumeEntity)
     private readonly candidateResumeRepository: Repository<CandidateResumeEntity>,
+    private readonly companyDomainService: CompanyDomainService,
   ) {}
 
   async listSkills(): Promise<CompanySkillItem[]> {
@@ -74,14 +73,18 @@ export class CompanyRepository implements ICompanyRepository {
       salary: data.salary ?? null,
       requirements: data.requirements,
       experienceLevel: data.experienceLevel,
-      status: VacancyStatus.ARCHIVED,
+      status: this.companyDomainService.getInitialVacancyStatus(),
       publishedAt: undefined,
       skills,
     });
 
     const saved = await this.vacancyRepository.save(vacancy);
+    const savedWithRelations = await this.findCompanyVacancy(
+      company.id,
+      saved.id,
+    );
 
-    return this.mapVacancy(saved);
+    return CompanyRepositoryMapper.toVacancy(savedWithRelations);
   }
 
   async updateVacancy(
@@ -116,14 +119,21 @@ export class CompanyRepository implements ICompanyRepository {
       vacancy.skills = await this.getSkillsByIds(data.skillIds);
     }
 
-    if (vacancy.status === VacancyStatus.PUBLISHED) {
-      vacancy.status = VacancyStatus.PENDING_REVIEW;
+    const statusAfterUpdate =
+      this.companyDomainService.getStatusAfterVacancyUpdate(vacancy.status);
+    vacancy.status = statusAfterUpdate.status;
+
+    if (statusAfterUpdate.resetPublishedAt) {
       vacancy.publishedAt = undefined;
     }
 
     const saved = await this.vacancyRepository.save(vacancy);
+    const savedWithRelations = await this.findCompanyVacancy(
+      company.id,
+      saved.id,
+    );
 
-    return this.mapVacancy(saved);
+    return CompanyRepositoryMapper.toVacancy(savedWithRelations);
   }
 
   async publishVacancyForReview(
@@ -133,7 +143,7 @@ export class CompanyRepository implements ICompanyRepository {
     const company = await this.findCompanyByAuthId(authId);
     const vacancy = await this.findCompanyVacancy(company.id, vacancyId);
 
-    vacancy.status = VacancyStatus.PENDING_REVIEW;
+    vacancy.status = this.companyDomainService.getReviewStatus();
     vacancy.publishedAt = undefined;
 
     await this.vacancyRepository.save(vacancy);
@@ -143,7 +153,7 @@ export class CompanyRepository implements ICompanyRepository {
     const company = await this.findCompanyByAuthId(authId);
     const vacancy = await this.findCompanyVacancy(company.id, vacancyId);
 
-    vacancy.status = VacancyStatus.ARCHIVED;
+    vacancy.status = this.companyDomainService.getArchivedStatus();
 
     await this.vacancyRepository.save(vacancy);
   }
@@ -171,6 +181,7 @@ export class CompanyRepository implements ICompanyRepository {
       where: whereCondition,
       relations: {
         skills: true,
+        companyProfile: true,
       },
       order: {
         createdAt: 'DESC',
@@ -180,9 +191,19 @@ export class CompanyRepository implements ICompanyRepository {
     });
 
     return {
-      items: vacancies.map((item) => this.mapVacancy(item)),
+      items: vacancies.map((item) => CompanyRepositoryMapper.toVacancy(item)),
       meta: this.buildMeta(query.page, query.limit, total),
     };
+  }
+
+  async getCompanyVacancy(
+    authId: string,
+    vacancyId: string,
+  ): Promise<CompanyVacancyItem> {
+    const company = await this.findCompanyByAuthId(authId);
+    const vacancy = await this.findCompanyVacancy(company.id, vacancyId);
+
+    return CompanyRepositoryMapper.toVacancy(vacancy);
   }
 
   async getCandidatesWithResume(
@@ -207,8 +228,12 @@ export class CompanyRepository implements ICompanyRepository {
 
     const items = resumes.map((resume) => {
       const candidate = resume.candidateProfile;
-      const firstExperience = this.sortExperiences(resume.experiences)[0];
-      const firstEducation = this.sortEducations(resume.educations)[0];
+      const firstExperience = CompanyRepositoryMapper.getFirstExperience(
+        resume.experiences,
+      );
+      const firstEducation = CompanyRepositoryMapper.getFirstEducation(
+        resume.educations,
+      );
 
       return {
         candidateProfileId: candidate.id,
@@ -240,7 +265,7 @@ export class CompanyRepository implements ICompanyRepository {
     const resume =
       await this.findResumeByCandidateProfileId(candidateProfileId);
 
-    return this.mapCandidateResume(resume);
+    return CompanyRepositoryMapper.toCandidateResume(resume);
   }
 
   async inviteCandidate(
@@ -260,10 +285,14 @@ export class CompanyRepository implements ICompanyRepository {
       throw new NotFoundException('Вакансия компании не найдена');
     }
 
-    if (vacancy.status === VacancyStatus.ARCHIVED) {
-      throw new BadRequestException(
-        'Нельзя приглашать кандидатов на архивную вакансию',
-      );
+    try {
+      this.companyDomainService.validateCanInviteForVacancy(vacancy.status);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Нельзя пригласить кандидата на эту вакансию';
+      throw new BadRequestException(message);
     }
 
     const candidate = await this.candidateProfileRepository.findOne({
@@ -286,7 +315,8 @@ export class CompanyRepository implements ICompanyRepository {
     });
 
     if (existingApplication) {
-      existingApplication.status = ApplicationStatus.INVITED;
+      existingApplication.status =
+        this.companyDomainService.getInvitedApplicationStatus();
       if (!existingApplication.resumePdfUrl) {
         existingApplication.resumePdfUrl = resume.resumePdfUrl;
       }
@@ -299,7 +329,7 @@ export class CompanyRepository implements ICompanyRepository {
       id: `application-${randomUUID()}`,
       candidateProfileId: data.candidateProfileId,
       vacancyId: data.vacancyId,
-      status: ApplicationStatus.INVITED,
+      status: this.companyDomainService.getInvitedApplicationStatus(),
       resumePdfUrl: resume.resumePdfUrl,
     });
 
@@ -372,7 +402,12 @@ export class CompanyRepository implements ICompanyRepository {
       applicationId,
     );
 
-    if (status === ApplicationStatus.INVITED && !application.resumePdfUrl) {
+    if (
+      this.companyDomainService.shouldAttachResumeForInvitation(
+        status,
+        application.resumePdfUrl,
+      )
+    ) {
       const resume = await this.findResumeByCandidateProfileId(
         application.candidateProfileId,
       );
@@ -397,7 +432,7 @@ export class CompanyRepository implements ICompanyRepository {
       application.candidateProfileId,
     );
 
-    return this.mapCandidateResume(resume);
+    return CompanyRepositoryMapper.toCandidateResume(resume);
   }
 
   private async findCompanyByAuthId(
@@ -425,6 +460,7 @@ export class CompanyRepository implements ICompanyRepository {
       },
       relations: {
         skills: true,
+        companyProfile: true,
       },
     });
 
@@ -497,85 +533,6 @@ export class CompanyRepository implements ICompanyRepository {
     }
 
     return application;
-  }
-
-  private mapVacancy(vacancy: VacancyEntity): CompanyVacancyItem {
-    return {
-      id: vacancy.id,
-      position: vacancy.position,
-      location: vacancy.location,
-      salary: vacancy.salary ?? null,
-      requirements: vacancy.requirements,
-      experienceLevel: vacancy.experienceLevel,
-      status: vacancy.status,
-      publishedAt: vacancy.publishedAt
-        ? vacancy.publishedAt.toISOString()
-        : null,
-      createdAt: vacancy.createdAt.toISOString(),
-      skills: (vacancy.skills ?? []).map((skill) => ({
-        id: skill.id,
-        name: skill.name,
-      })),
-    };
-  }
-
-  private mapCandidateResume(
-    resume: CandidateResumeEntity,
-  ): CompanyCandidateResume {
-    const candidate = resume.candidateProfile;
-
-    return {
-      candidateProfileId: candidate.id,
-      firstName: candidate.firstName,
-      lastName: candidate.lastName,
-      email: candidate.auth.email,
-      phone: candidate.phone,
-      profession: resume.profession,
-      location: resume.location,
-      expectedSalary: resume.expectedSalary,
-      about: resume.about,
-      resumePdfUrl: resume.resumePdfUrl,
-      experiences: this.sortExperiences(resume.experiences).map((item) => ({
-        id: item.id,
-        companyName: item.companyName,
-        position: item.position,
-        period: item.period,
-        description: item.description,
-        orderIndex: item.orderIndex,
-      })),
-      educations: this.sortEducations(resume.educations).map((item) => ({
-        id: item.id,
-        institutionName: item.institutionName,
-        studyPeriod: item.studyPeriod,
-        degree: item.degree,
-        specialization: item.specialization,
-        orderIndex: item.orderIndex,
-      })),
-      skills: (resume.skills ?? []).map((skill) => ({
-        id: skill.id,
-        name: skill.name,
-      })),
-    };
-  }
-
-  private sortExperiences(
-    items?: CandidateResumeExperienceEntity[],
-  ): CandidateResumeExperienceEntity[] {
-    if (!items) {
-      return [];
-    }
-
-    return [...items].sort((a, b) => a.orderIndex - b.orderIndex);
-  }
-
-  private sortEducations(
-    items?: CandidateResumeEducationEntity[],
-  ): CandidateResumeEducationEntity[] {
-    if (!items) {
-      return [];
-    }
-
-    return [...items].sort((a, b) => a.orderIndex - b.orderIndex);
   }
 
   private buildMeta(

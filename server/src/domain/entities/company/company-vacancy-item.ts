@@ -5,6 +5,7 @@ import { CompanySkillItem } from './company-skill-item';
 export interface CompanyVacancyItem {
   id: string;
   position: string;
+  companyName: string;
   location: string;
   salary: number | null;
   requirements: string;

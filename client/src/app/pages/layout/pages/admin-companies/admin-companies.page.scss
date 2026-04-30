@@ -22,6 +22,14 @@
   flex-wrap: wrap;
 }
 
+.row-clickable {
+  cursor: pointer;
+}
+
+.row-clickable:hover {
+  background: #f9fafb;
+}
+
 :host ::ng-deep .ant-table-pagination.ant-pagination {
   margin-bottom: 0;
 }

@@ -1,4 +1,5 @@
 import { AdminActivityItem } from '@domain/entities/admin/admin-activity-item';
+import { AdminVacancyDetails } from '@domain/entities/admin/admin-vacancy-details';
 import { AdminDashboardMetrics } from '@domain/entities/admin/admin-dashboard-metrics';
 import { AdminVacancyItem } from '@domain/entities/admin/admin-vacancy-item';
 import { PaginatedResult } from '@domain/entities/common/paginated-result';
@@ -16,6 +17,7 @@ export interface IAdminRepository {
     query: PaginationQuery,
     status?: VacancyStatus,
   ): Promise<PaginatedResult<AdminVacancyItem>>;
+  getVacancyDetails(vacancyId: string): Promise<AdminVacancyDetails>;
   publishVacancy(vacancyId: string): Promise<void>;
   archiveVacancy(vacancyId: string): Promise<void>;
   deleteArchivedVacancy(vacancyId: string): Promise<void>;

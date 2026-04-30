@@ -83,6 +83,23 @@ export class CompanyController {
     return this.responseService.success('Вакансии получены', result);
   }
 
+  @Get('vacancies/:vacancyId')
+  @ApiOperation({
+    summary: 'Получить детальную информацию по вакансии компании',
+  })
+  @ApiResponse({ status: 200, description: 'Детали вакансии получены' })
+  async getVacancyDetails(
+    @Request() req: AuthenticatedRequest,
+    @Param('vacancyId') vacancyId: string,
+  ) {
+    const result = await this.companyService.getCompanyVacancy(
+      req.user.id,
+      vacancyId,
+    );
+
+    return this.responseService.success('Детали вакансии получены', result);
+  }
+
   @Patch('vacancies/:vacancyId')
   @ApiOperation({ summary: 'Редактировать вакансию компании' })
   @ApiResponse({ status: 200, description: 'Вакансия обновлена' })

@@ -13,6 +13,7 @@ import {
   BankOutline,
   UserOutline,
   LogoutOutline,
+  ArrowLeftOutline,
 } from '@ant-design/icons-angular/icons';
 
 export const icons = [
@@ -30,4 +31,5 @@ export const icons = [
   BankOutline,
   UserOutline,
   LogoutOutline,
+  ArrowLeftOutline,
 ];

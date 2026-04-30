@@ -1,0 +1,32 @@
+.experience-card {
+  border-radius: 10px;
+}
+
+.experience-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.experience-card__position {
+  margin: 0;
+  font-weight: 600;
+  color: #101828;
+}
+
+.experience-card__company {
+  margin: 2px 0 0;
+  color: #475467;
+}
+
+.experience-card__period {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #667085;
+}
+
+.experience-card__description {
+  margin: 8px 0 0;
+  white-space: pre-line;
+  color: #344054;
+}

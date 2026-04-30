@@ -35,6 +35,13 @@ export const LAYOUT_ROUTES: Routes = [
         data: { roles: ['candidate'] },
       },
       {
+        path: 'vacancy/:vacancyId',
+        loadComponent: () =>
+          import('./pages/vacancy-details/vacancy-details.page').then((m) => m.VacancyDetailsPage),
+        canActivate: [roleTabGuard],
+        data: { roles: ['candidate', 'company', 'admin'] },
+      },
+      {
         path: 'company/vacancies',
         loadComponent: () =>
           import('./pages/company-vacancies/company-vacancies.page').then(
@@ -58,13 +65,6 @@ export const LAYOUT_ROUTES: Routes = [
           import('./pages/company-responses/company-responses.page').then(
             (m) => m.CompanyResponsesPage,
           ),
-        canActivate: [roleTabGuard],
-        data: { roles: ['company'] },
-      },
-      {
-        path: 'company/profile',
-        loadComponent: () =>
-          import('./pages/company-profile/company-profile.page').then((m) => m.CompanyProfilePage),
         canActivate: [roleTabGuard],
         data: { roles: ['company'] },
       },

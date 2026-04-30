@@ -1,6 +1,352 @@
 <section class="page">
   <h1 class="page-title">Резюме</h1>
+
   <nz-content class="page-content">
-    <div class="hello-box">hello CandidateResumePage</div>
+    @if (isInitialLoading()) {
+      <div class="loading-box">Загрузка резюме...</div>
+    } @else {
+      <nz-steps class="steps" nzSize="small" [nzCurrent]="currentStepIndex()">
+        @for (step of steps; track step.key) {
+          <nz-step [nzTitle]="step.title" [nzDescription]="step.subtitle" />
+        }
+      </nz-steps>
+
+      <div class="step-host">
+        @if (currentStepTemplate(); as templateRef) {
+          <ng-container [ngTemplateOutlet]="templateRef"></ng-container>
+        }
+      </div>
+    }
   </nz-content>
+
+  <nz-modal
+    [nzVisible]="isExperiencePreviewOpen()"
+    nzTitle="Опыт работы"
+    nzCancelText="Закрыть"
+    [nzFooter]="null"
+    (nzOnCancel)="closeExperiencePreview()"
+  >
+    <ng-container *nzModalContent>
+      <div class="modal-scroll-list">
+        @for (item of experiences(); track item.id) {
+          <app-candidate-resume-experience-card
+            [item]="item"
+          ></app-candidate-resume-experience-card>
+        }
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
+    [nzVisible]="isEducationPreviewOpen()"
+    nzTitle="Образование"
+    nzCancelText="Закрыть"
+    [nzFooter]="null"
+    (nzOnCancel)="closeEducationPreview()"
+  >
+    <ng-container *nzModalContent>
+      <div class="modal-scroll-list">
+        @for (item of educations(); track item.id) {
+          <app-candidate-resume-education-card [item]="item"></app-candidate-resume-education-card>
+        }
+      </div>
+    </ng-container>
+  </nz-modal>
 </section>
+
+<ng-template #baseStepTemplate>
+  <form nz-form [formGroup]="baseForm" class="step-form">
+    <nz-form-item>
+      <nz-form-label [nzSpan]="24" nzFor="profession" nzRequired>Профессия</nz-form-label>
+      <nz-form-control [nzSpan]="24" nzErrorTip="Введите профессию от 2 символов">
+        <input
+          id="profession"
+          nz-input
+          formControlName="profession"
+          placeholder="Frontend Developer"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="24" nzFor="location" nzRequired>Город проживания</nz-form-label>
+      <nz-form-control [nzSpan]="24" nzErrorTip="Введите город от 2 символов">
+        <input id="location" nz-input formControlName="location" placeholder="Минск" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="24" nzFor="expectedSalary">Ожидаемый доход</nz-form-label>
+      <nz-form-control [nzSpan]="24">
+        <nz-input-number
+          id="expectedSalary"
+          formControlName="expectedSalary"
+          [nzMin]="0"
+          [nzPrecision]="0"
+          [nzStep]="500"
+          nzPlaceHolder="Например, 2500"
+        ></nz-input-number>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="24" nzFor="about">О себе</nz-form-label>
+      <nz-form-control [nzSpan]="24" nzErrorTip="Не более 5000 символов">
+        <textarea
+          id="about"
+          nz-input
+          rows="5"
+          formControlName="about"
+          placeholder="Кратко расскажите о вашем опыте и целях"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <div class="step-actions step-actions--end">
+    <button nz-button nzType="primary" (click)="goToNextStep()">Продолжить</button>
+  </div>
+</ng-template>
+
+<ng-template #experienceStepTemplate>
+  <div class="step-scroll-container">
+    <form nz-form [formGroup]="experienceForm" class="step-form">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="companyName" nzRequired>Компания</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Укажите название компании">
+          <input id="companyName" nz-input formControlName="companyName" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="position" nzRequired>Должность</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Укажите должность">
+          <input id="position" nz-input formControlName="position" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="period" nzRequired>Период</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Введите период работы">
+          <input id="period" nz-input formControlName="period" placeholder="Янв 2023 - Мар 2025" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="description" nzRequired>Описание</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Введите описание от 3 символов">
+          <textarea id="description" nz-input rows="4" formControlName="description"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <button nz-button nzType="dashed" class="add-button" (click)="addExperience()">
+      Добавить опыт работы
+    </button>
+
+    <div class="cards-list">
+      @for (item of experiences(); track item.id) {
+        <app-candidate-resume-experience-card
+          [item]="item"
+          [showRemove]="true"
+          (remove)="removeExperience($event)"
+        ></app-candidate-resume-experience-card>
+      }
+    </div>
+  </div>
+
+  <div class="step-actions">
+    <button nz-button nzType="default" (click)="goToPreviousStep()">Назад</button>
+    <button nz-button nzType="primary" (click)="goToNextStep()">Продолжить</button>
+  </div>
+</ng-template>
+
+<ng-template #educationStepTemplate>
+  <div class="step-scroll-container">
+    <form nz-form [formGroup]="educationForm" class="step-form">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="institutionName" nzRequired>Учреждение</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Укажите учебное заведение">
+          <input id="institutionName" nz-input formControlName="institutionName" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="studyPeriod" nzRequired>Период обучения</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Введите период обучения">
+          <input
+            id="studyPeriod"
+            nz-input
+            formControlName="studyPeriod"
+            placeholder="2019 - 2023"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="degree" nzRequired>Степень</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Укажите степень">
+          <input id="degree" nz-input formControlName="degree" placeholder="Бакалавр" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="specialization" nzRequired>Специализация</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Укажите специализацию">
+          <input id="specialization" nz-input formControlName="specialization" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <button nz-button nzType="dashed" class="add-button" (click)="addEducation()">
+      Добавить образование
+    </button>
+
+    <div class="cards-list">
+      @for (item of educations(); track item.id) {
+        <app-candidate-resume-education-card
+          [item]="item"
+          [showRemove]="true"
+          (remove)="removeEducation($event)"
+        ></app-candidate-resume-education-card>
+      }
+    </div>
+  </div>
+
+  <div class="step-actions">
+    <button nz-button nzType="default" (click)="goToPreviousStep()">Назад</button>
+    <button nz-button nzType="primary" (click)="goToNextStep()">Продолжить</button>
+  </div>
+</ng-template>
+
+<ng-template #skillsStepTemplate>
+  @if (isSkillsLoading()) {
+    <div class="loading-box">Загрузка навыков...</div>
+  } @else {
+    <div class="skills-grid">
+      @for (skill of skills(); track skill.id) {
+        <button
+          nz-button
+          [nzType]="isSkillSelected(skill.id) ? 'primary' : 'default'"
+          (click)="toggleSkill(skill.id)"
+        >
+          {{ skill.name }}
+        </button>
+      }
+    </div>
+
+    <div class="selected-skills-block">
+      <h3 class="selected-title">Выбранные навыки</h3>
+
+      @if (selectedSkills().length === 0) {
+        <p class="empty-note">Навыки пока не выбраны.</p>
+      } @else {
+        <div class="selected-skills-list">
+          @for (skill of selectedSkills(); track skill.id) {
+            <span class="selected-skill-chip">
+              <span>{{ skill.name }}</span>
+              <button type="button" class="chip-remove-button" (click)="removeSkill(skill.id)">
+                x
+              </button>
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <div class="step-actions">
+    <button nz-button nzType="default" (click)="goToPreviousStep()">Назад</button>
+    <button nz-button nzType="primary" (click)="goToNextStep()">Продолжить</button>
+  </div>
+</ng-template>
+
+<ng-template #reviewStepTemplate>
+  <div class="review-layout">
+    <nz-card nzSize="small">
+      <h3 class="review-title">Основная информация</h3>
+      <div class="review-grid">
+        <div>
+          <span class="review-label">Профессия</span>
+          <p>{{ baseForm.getRawValue().profession || 'Не указано' }}</p>
+        </div>
+        <div>
+          <span class="review-label">Город</span>
+          <p>{{ baseForm.getRawValue().location || 'Не указано' }}</p>
+        </div>
+        <div>
+          <span class="review-label">Ожидаемый доход</span>
+          <p>{{ formatSalary(baseForm.getRawValue().expectedSalary) }}</p>
+        </div>
+      </div>
+
+      <div class="review-about">
+        <span class="review-label">О себе</span>
+        <p>{{ baseForm.getRawValue().about || 'Не указано' }}</p>
+      </div>
+    </nz-card>
+
+    <nz-card nzSize="small">
+      <div class="review-card-header">
+        <h3 class="review-title">Опыт работы ({{ experiences().length }})</h3>
+        <button
+          nz-button
+          nzType="link"
+          [disabled]="experiences().length === 0"
+          (click)="openExperiencePreview()"
+        >
+          Просмотр
+        </button>
+      </div>
+
+      <div class="cards-list">
+        @for (item of experiences(); track item.id) {
+          <app-candidate-resume-experience-card
+            [item]="item"
+          ></app-candidate-resume-experience-card>
+        }
+      </div>
+    </nz-card>
+
+    <nz-card nzSize="small">
+      <div class="review-card-header">
+        <h3 class="review-title">Образование ({{ educations().length }})</h3>
+        <button
+          nz-button
+          nzType="link"
+          [disabled]="educations().length === 0"
+          (click)="openEducationPreview()"
+        >
+          Просмотр
+        </button>
+      </div>
+
+      <div class="cards-list">
+        @for (item of educations(); track item.id) {
+          <app-candidate-resume-education-card [item]="item"></app-candidate-resume-education-card>
+        }
+      </div>
+    </nz-card>
+
+    <nz-card nzSize="small">
+      <h3 class="review-title">Навыки ({{ selectedSkills().length }})</h3>
+
+      @if (selectedSkills().length === 0) {
+        <p class="empty-note">Навыки пока не выбраны.</p>
+      } @else {
+        <div class="skills-tags-list">
+          @for (skill of selectedSkills(); track skill.id) {
+            <nz-tag [nzBordered]="false">{{ skill.name }}</nz-tag>
+          }
+        </div>
+      }
+    </nz-card>
+  </div>
+
+  <div class="step-actions">
+    <button nz-button nzType="default" (click)="startEditing()">Редактировать</button>
+    <button nz-button nzType="primary" [nzLoading]="isSaving()" (click)="saveResume()">
+      Сохранить резюме
+    </button>
+  </div>
+</ng-template>

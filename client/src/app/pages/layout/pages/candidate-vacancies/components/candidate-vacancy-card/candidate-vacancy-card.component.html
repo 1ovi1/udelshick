@@ -1,0 +1,31 @@
+<nz-card class="vacancy-card">
+  <div class="vacancy-card__layout">
+    <section class="vacancy-main">
+      <div class="vacancy-main__top">
+        <h2 class="vacancy-title">{{ vacancy().position }}</h2>
+        <p class="vacancy-salary">{{ salaryLabel }}</p>
+      </div>
+
+      <div class="vacancy-main__tags">
+        <nz-tag [nzBordered]="false" class="tag">{{ experienceLabel }}</nz-tag>
+        <nz-tag [nzBordered]="false" class="tag" nzColor="green"
+          >Подходит по навыкам на {{ vacancy().matchingSkillsPercent }}%</nz-tag
+        >
+      </div>
+
+      <div class="vacancy-actions">
+        <button nz-button nzType="primary" (click)="onOpenApply()">Откликнуться</button>
+        <button nz-button nzType="default" (click)="onOpenDetails()">Подробнее</button>
+      </div>
+    </section>
+
+    <section class="vacancy-company-block">
+      <nz-avatar [nzText]="companyInitial" [nzSize]="32" class="company-avatar" />
+
+      <div class="vacancy-company-info">
+        <h3 class="vacancy-company">{{ vacancy().companyName }}</h3>
+        <h5 class="vacancy-location">{{ vacancy().location }}</h5>
+      </div>
+    </section>
+  </div>
+</nz-card>

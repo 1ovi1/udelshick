@@ -1,0 +1,37 @@
+<article class="candidate-card">
+  <section class="candidate-card__left candidate-card__section">
+    <div class="candidate-main">
+      <nz-avatar class="candidate-avatar" [nzText]="initials" [nzSize]="94" />
+
+      <div class="candidate-main__text">
+        <h3 class="profession">{{ item().profession }}</h3>
+        <h4 class="name">{{ fullName }}</h4>
+      </div>
+    </div>
+  </section>
+
+  <section class="candidate-card__middle candidate-card__section">
+    <div class="meta-row">
+      <h4 class="meta-label">Город</h4>
+      <h4 class="meta-value">{{ item().location }}</h4>
+    </div>
+
+    <div class="meta-row">
+      <h4 class="meta-label">Образование</h4>
+      <h4 class="meta-value">{{ item().education }}</h4>
+    </div>
+
+    <div class="meta-row meta-row--contacts">
+      <h4 class="meta-label">Контакты</h4>
+      <div class="contacts-block">
+        <h4 class="meta-value">{{ item().phone }}</h4>
+        <h4 class="meta-value">{{ item().email }}</h4>
+      </div>
+    </div>
+  </section>
+
+  <section class="card-actions">
+    <button nz-button nzType="primary" (click)="onInvite()">Пригласить</button>
+    <button nz-button nzType="default" (click)="onOpenResume()">Резюме</button>
+  </section>
+</article>

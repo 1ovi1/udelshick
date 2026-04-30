@@ -1,0 +1,111 @@
+.vacancy-card {
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.vacancy-card__layout {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.vacancy-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.vacancy-main__top {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.vacancy-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  color: #101828;
+}
+
+.vacancy-salary {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  color: #101828;
+  font-weight: 700;
+}
+
+.vacancy-main__tags {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .tag {
+    width: fit-content;
+  }
+}
+
+.vacancy-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vacancy-company-block {
+  padding-left: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.company-avatar {
+  background: #d0d5dd;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.vacancy-company-info {
+  min-width: 0;
+}
+
+.vacancy-company {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  color: #344054;
+  word-break: break-word;
+}
+
+.vacancy-location {
+  margin: 4px 0 0;
+  color: #667085;
+}
+
+@media (max-width: 768px) {
+  .vacancy-card__layout {
+    flex-direction: column;
+  }
+
+  .vacancy-company-block {
+    flex-basis: auto;
+    border-left: none;
+    border-top: 1px solid #eaecf0;
+    padding-left: 0;
+    padding-top: 14px;
+  }
+
+  .vacancy-main__top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

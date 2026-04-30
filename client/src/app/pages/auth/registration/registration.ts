@@ -12,6 +12,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { Auth } from '../auth.service';
 import { AUTH_ROLE_META } from '../models/auth-role.const';
@@ -26,6 +27,7 @@ import { getDefaultLayoutPath } from '../../layout/utils/layout-tabs.utils';
     RouterLink,
     NzFormModule,
     NzInputModule,
+    NzIconModule,
     NzButtonModule,
     NgxMaskDirective,
   ],
@@ -52,6 +54,10 @@ export class Registration {
   protected readonly isUserRegistration = computed(() => this.roleMeta().routeRole === 'user');
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly showUserPassword = signal(false);
+  protected readonly showUserConfirmPassword = signal(false);
+  protected readonly showCompanyPassword = signal(false);
+  protected readonly showCompanyConfirmPassword = signal(false);
 
   protected readonly userForm = this.fb.nonNullable.group(
     {
@@ -157,6 +163,22 @@ export class Registration {
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  protected toggleUserPasswordVisibility(): void {
+    this.showUserPassword.update((value) => !value);
+  }
+
+  protected toggleUserConfirmPasswordVisibility(): void {
+    this.showUserConfirmPassword.update((value) => !value);
+  }
+
+  protected toggleCompanyPasswordVisibility(): void {
+    this.showCompanyPassword.update((value) => !value);
+  }
+
+  protected toggleCompanyConfirmPasswordVisibility(): void {
+    this.showCompanyConfirmPassword.update((value) => !value);
   }
 
   private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {

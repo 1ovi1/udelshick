@@ -114,3 +114,20 @@ button {
   font-size: 14px;
   line-height: 22px;
 }
+
+.ant-btn:not(.ant-btn-link):not(.ant-btn-text):not(.ant-btn-icon-only):not(.ant-btn-circle) {
+  height: 40px;
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ant-tag {
+  border-radius: 6px;
+  margin-right: 0;
+}

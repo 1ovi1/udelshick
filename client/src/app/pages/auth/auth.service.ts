@@ -64,7 +64,7 @@ export class Auth {
         user: {
           id: profile.id,
           email: profile.email,
-          name: this.toDisplayName(profile.email),
+          name: profile.name || this.toDisplayName(profile.email),
         },
       };
 
@@ -149,7 +149,7 @@ export class Auth {
           user: {
             id: profile.id,
             email: profile.email,
-            name: this.toDisplayName(profile.email),
+            name: profile.name || this.toDisplayName(profile.email),
           },
           role: profile.role,
         };
@@ -183,7 +183,7 @@ export class Auth {
       .pipe(
         map((response) => response.data as MeResponseData),
         switchMap((data) => {
-          if (!data?.id || !data.email || !data.role) {
+          if (!data?.id || !data.email || !data.role || !data.name) {
             return throwError(() => new Error('Некорректный ответ профиля пользователя.'));
           }
 

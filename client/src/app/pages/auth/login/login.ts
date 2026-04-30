@@ -6,6 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { Auth } from '../auth.service';
 import { AUTH_ROLE_META } from '../models/auth-role.const';
@@ -14,7 +15,14 @@ import { getDefaultLayoutPath } from '../../layout/utils/layout-tabs.utils';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, NzFormModule, NzInputModule, NzButtonModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    NzFormModule,
+    NzInputModule,
+    NzIconModule,
+    NzButtonModule,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -41,6 +49,11 @@ export class Login {
 
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword.update((value) => !value);
+  }
 
   protected async onSubmit(): Promise<void> {
     if (this.form.invalid) {

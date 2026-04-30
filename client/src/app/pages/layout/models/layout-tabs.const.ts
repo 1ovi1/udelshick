@@ -11,7 +11,6 @@ const CompanyTabs: readonly LayoutMenuItem[] = [
   { label: 'Вакансии', icon: 'solution', path: 'company/vacancies' },
   { label: 'Кандидаты', icon: 'team', path: 'company/candidates' },
   { label: 'Отклики', icon: 'inbox', path: 'company/responses' },
-  { label: 'Профиль', icon: 'profile', path: 'company/profile' },
 ];
 
 const AdminTabs: readonly LayoutMenuItem[] = [

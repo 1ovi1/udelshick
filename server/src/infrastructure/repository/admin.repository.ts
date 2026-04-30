@@ -1,4 +1,5 @@
 import { AdminActivityItem } from '@domain/entities/admin/admin-activity-item';
+import { AdminVacancyDetails } from '@domain/entities/admin/admin-vacancy-details';
 import { AdminDashboardMetrics } from '@domain/entities/admin/admin-dashboard-metrics';
 import { AdminVacancyItem } from '@domain/entities/admin/admin-vacancy-item';
 import { PaginatedResult } from '@domain/entities/common/paginated-result';
@@ -8,6 +9,7 @@ import { AdminActivityStatus } from '@domain/entities/enums/admin-activity-statu
 import { Role } from '@domain/entities/enums/role.enum';
 import { VacancyStatus } from '@domain/entities/enums/vacancy-status.enum';
 import { IAdminRepository } from '@domain/interfaces/repositories/admin-repository.interface';
+import { AdminDomainService } from '@domain/services/admin-domain.service';
 import { AuthEntity } from '@infrastructure/entities/auth.entity';
 import { ApplicationEntity } from '@infrastructure/entities/application.entity';
 import { VacancyEntity } from '@infrastructure/entities/vacancy.entity';
@@ -31,6 +33,7 @@ export class AdminRepository implements IAdminRepository {
     @InjectRepository(ApplicationEntity)
     private readonly applicationRepository: Repository<ApplicationEntity>,
     private readonly dataSource: DataSource,
+    private readonly adminDomainService: AdminDomainService,
   ) {}
 
   async getDashboardMetrics(): Promise<AdminDashboardMetrics> {
@@ -140,8 +143,14 @@ export class AdminRepository implements IAdminRepository {
       throw new NotFoundException('Пользователь не найден');
     }
 
-    if (user.role === Role.ADMIN) {
-      throw new BadRequestException('Нельзя удалить администратора');
+    try {
+      this.adminDomainService.validateCanDeleteUser(user.role);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Невозможно удалить пользователя';
+      throw new BadRequestException(message);
     }
 
     await this.authRepository.delete({ id: authId });
@@ -189,6 +198,39 @@ export class AdminRepository implements IAdminRepository {
     };
   }
 
+  async getVacancyDetails(vacancyId: string): Promise<AdminVacancyDetails> {
+    const vacancy = await this.vacancyRepository.findOne({
+      where: { id: vacancyId },
+      relations: {
+        companyProfile: true,
+        skills: true,
+      },
+    });
+
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найдена');
+    }
+
+    return {
+      id: vacancy.id,
+      position: vacancy.position,
+      companyName: vacancy.companyProfile.companyName,
+      location: vacancy.location,
+      salary: vacancy.salary ?? null,
+      requirements: vacancy.requirements,
+      experienceLevel: vacancy.experienceLevel,
+      status: vacancy.status,
+      publishedAt: vacancy.publishedAt
+        ? vacancy.publishedAt.toISOString()
+        : null,
+      createdAt: vacancy.createdAt.toISOString(),
+      skills: (vacancy.skills ?? []).map((skill) => ({
+        id: skill.id,
+        name: skill.name,
+      })),
+    };
+  }
+
   async publishVacancy(vacancyId: string): Promise<void> {
     const vacancy = await this.vacancyRepository.findOne({
       where: { id: vacancyId },
@@ -198,8 +240,11 @@ export class AdminRepository implements IAdminRepository {
       throw new NotFoundException('Вакансия не найдена');
     }
 
-    vacancy.status = VacancyStatus.PUBLISHED;
-    vacancy.publishedAt = vacancy.publishedAt ?? new Date();
+    const nextState = this.adminDomainService.getPublishedVacancyState(
+      vacancy.publishedAt,
+    );
+    vacancy.status = nextState.status;
+    vacancy.publishedAt = nextState.publishedAt;
 
     await this.vacancyRepository.save(vacancy);
   }
@@ -213,7 +258,7 @@ export class AdminRepository implements IAdminRepository {
       throw new NotFoundException('Вакансия не найдена');
     }
 
-    vacancy.status = VacancyStatus.ARCHIVED;
+    vacancy.status = this.adminDomainService.getArchivedVacancyStatus();
     await this.vacancyRepository.save(vacancy);
   }
 
@@ -226,8 +271,12 @@ export class AdminRepository implements IAdminRepository {
       throw new NotFoundException('Вакансия не найдена');
     }
 
-    if (vacancy.status !== VacancyStatus.ARCHIVED) {
-      throw new BadRequestException('Удалить можно только архивную вакансию');
+    try {
+      this.adminDomainService.validateCanDeleteVacancy(vacancy.status);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Невозможно удалить вакансию';
+      throw new BadRequestException(message);
     }
 
     await this.vacancyRepository.delete({ id: vacancyId });

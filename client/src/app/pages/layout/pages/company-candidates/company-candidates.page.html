@@ -2,56 +2,48 @@
   <h1 class="page-title">Кандидаты</h1>
 
   <nz-content class="page-content">
-    <nz-table
-      #candidatesTable
-      [nzData]="candidates()"
-      [nzFrontPagination]="false"
-      [nzTotal]="total()"
-      [nzPageIndex]="pageIndex()"
-      [nzPageSize]="pageSize()"
-      [nzLoading]="isLoading()"
-      [nzShowSizeChanger]="true"
-      [nzPageSizeOptions]="[5, 10, 20, 50]"
-      (nzQueryParams)="onQueryParamsChange($event)"
-    >
-      <thead>
-        <tr>
-          <th>Кандидат</th>
-          <th>Профессия</th>
-          <th>Локация</th>
-          <th>Опыт</th>
-          <th>Образование</th>
-          <th>Контакты</th>
-          <th>Действия</th>
-        </tr>
-      </thead>
+    <div class="toolbar">
+      <input
+        nz-input
+        placeholder="Поиск кандидата"
+        [value]="searchQuery()"
+        (input)="onSearchChange(searchInput.value)"
+        #searchInput
+      />
+      <button nz-button nzType="default" (click)="clearSearch()">Сбросить</button>
+      <button nz-button nzType="primary" (click)="onSearchChange(searchInput.value)">
+        <span nz-icon nzType="search"></span>
+        Найти кандидата
+      </button>
+    </div>
 
-      <tbody>
-        @for (item of candidatesTable.data; track item.candidateProfileId) {
-          <tr>
-            <td>{{ fullName(item) }}</td>
-            <td>{{ item.profession }}</td>
-            <td>{{ item.location }}</td>
-            <td>{{ item.experience }}</td>
-            <td>{{ item.education }}</td>
-            <td>
-              <div class="contacts-cell">
-                <span>{{ item.email }}</span>
-                <span>{{ item.phone }}</span>
-              </div>
-            </td>
-            <td>
-              <button nz-button nzType="link" (click)="openResume(item.candidateProfileId)">
-                Резюме
-              </button>
-              <button nz-button nzType="link" (click)="openInviteModal(item.candidateProfileId)">
-                Пригласить
-              </button>
-            </td>
-          </tr>
+    @if (isLoading()) {
+      <div class="state-box">Загрузка кандидатов...</div>
+    } @else if (filteredCandidates().length === 0) {
+      <div class="state-box">Кандидаты не найдены.</div>
+    } @else {
+      <div class="cards-list">
+        @for (item of filteredCandidates(); track item.candidateProfileId) {
+          <app-candidate-card
+            [item]="item"
+            (invite)="openInviteModal($event)"
+            (openResume)="openResume($event)"
+          />
         }
-      </tbody>
-    </nz-table>
+      </div>
+    }
+
+    <div class="pagination-wrapper">
+      <nz-pagination
+        [nzPageIndex]="pageIndex()"
+        [nzPageSize]="pageSize()"
+        [nzTotal]="total()"
+        [nzPageSizeOptions]="[5, 10, 20, 50]"
+        [nzShowSizeChanger]="true"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      />
+    </div>
   </nz-content>
 
   <nz-modal
@@ -82,7 +74,7 @@
               <h4>Навыки</h4>
               <div class="skills-list">
                 @for (skill of resume.skills; track skill.id) {
-                  <nz-tag>{{ skill.name }}</nz-tag>
+                  <nz-tag [nzBordered]="false">{{ skill.name }}</nz-tag>
                 }
               </div>
             </div>

@@ -8,7 +8,7 @@ export function toApplicationStatusLabel(status: ApplicationStatus): string {
   }
 
   if (status === 'viewed') {
-    return 'Просмотрен';
+    return 'Новый';
   }
 
   if (status === 'invited') {
@@ -16,23 +16,19 @@ export function toApplicationStatusLabel(status: ApplicationStatus): string {
   }
 
   if (status === 'accepted') {
-    return 'Принят';
+    return 'Приглашен';
   }
 
   if (status === 'withdrawn') {
-    return 'Отозван';
+    return 'Отклонен';
   }
 
   return 'Отклонен';
 }
 
 export function toApplicationStatusColor(status: ApplicationStatus): ApplicationStatusColor {
-  if (status === 'new') {
+  if (status === 'new' || status === 'viewed') {
     return 'gold';
-  }
-
-  if (status === 'viewed') {
-    return 'cyan';
   }
 
   if (status === 'invited' || status === 'accepted') {

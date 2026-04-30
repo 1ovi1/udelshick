@@ -39,6 +39,12 @@ export class CompanyDataService {
       .pipe(map((response) => this.requireData(response, 'vacancies')));
   }
 
+  getVacancyDetails(vacancyId: string): Observable<CompanyVacancyItem> {
+    return this.http
+      .get<ApiResponse<CompanyVacancyItem>>(`${this.apiBaseUrl}/vacancies/${vacancyId}`)
+      .pipe(map((response) => this.requireData(response, 'vacancy details')));
+  }
+
   createVacancy(data: CreateCompanyVacancyRequest): Observable<CompanyVacancyItem> {
     return this.http
       .post<ApiResponse<CompanyVacancyItem>>(`${this.apiBaseUrl}/vacancies`, data)

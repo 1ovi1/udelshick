@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { AdminDashboardData } from '../models/admin/admin-dashboard-data.interface';
+import { AdminVacancyDetails } from '../models/admin/admin-vacancy-details.interface';
 import { AdminActivityItem } from '../models/admin/admin-activity-item.interface';
 import { AdminVacancyItem } from '../models/admin/admin-vacancy-item.interface';
 import { ApiResponse } from '../models/admin/api-response.interface';
@@ -51,6 +52,12 @@ export class AdminDataService {
         ApiResponse<PaginatedResult<AdminVacancyItem>>
       >(`${this.apiBaseUrl}/vacancies`, { params })
       .pipe(map((response) => this.requireData(response, 'vacancies')));
+  }
+
+  getVacancyDetails(vacancyId: string): Observable<AdminVacancyDetails> {
+    return this.http
+      .get<ApiResponse<AdminVacancyDetails>>(`${this.apiBaseUrl}/vacancies/${vacancyId}`)
+      .pipe(map((response) => this.requireData(response, 'vacancy details')));
   }
 
   publishVacancy(vacancyId: string): Observable<void> {

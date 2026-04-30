@@ -51,7 +51,7 @@
         @for (item of activityTable.data; track item.authId) {
           <tr>
             <td>
-              <nz-tag [nzColor]="toStatusColor(item.status)">{{
+              <nz-tag [nzBordered]="false" [nzColor]="toStatusColor(item.status)">{{
                 toStatusLabel(item.status)
               }}</nz-tag>
             </td>

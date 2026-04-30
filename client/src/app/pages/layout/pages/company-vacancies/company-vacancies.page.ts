@@ -1,6 +1,7 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -17,6 +18,7 @@ import { CompanySkillItem } from '../../models/company/company-skill-item.interf
 import { CreateCompanyVacancyRequest } from '../../models/company/create-company-vacancy-request.interface';
 import { ExperienceLevel } from '../../models/company/experience-level.type';
 import { VacancyStatus } from '../../models/company/vacancy-status.type';
+import { CandidateVacancyRouteState } from '../../models/candidate/candidate-vacancy-route-state.interface';
 import { CompanyDataService } from '../../services/company.service';
 import { COMPANY_VACANCY_TABS } from './constants/vacancy-tab-view.constant';
 import { COMPANY_EXPERIENCE_OPTIONS } from './constants/experience-option.constant';
@@ -47,6 +49,7 @@ export class CompanyVacanciesPage implements OnInit {
   private readonly companyDataService = inject(CompanyDataService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   protected readonly tabs = COMPANY_VACANCY_TABS;
   protected readonly experienceOptions = COMPANY_EXPERIENCE_OPTIONS;
@@ -186,6 +189,19 @@ export class CompanyVacanciesPage implements OnInit {
 
   protected isActionLoading(vacancyId: string): boolean {
     return this.actionVacancyId() === vacancyId;
+  }
+
+  protected openVacancyDetails(item: CompanyVacancyItem): void {
+    const state: CandidateVacancyRouteState = {
+      sourceRole: 'company',
+      vacancyPreview: item,
+    };
+
+    void this.router.navigate(['/layout/vacancy', item.id], { state });
+  }
+
+  protected onActionClick(event: MouseEvent): void {
+    event.stopPropagation();
   }
 
   private loadSkills(): void {

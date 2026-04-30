@@ -7,7 +7,7 @@
       (nzSelectedIndexChange)="onTabIndexChange($event)"
     >
       @for (tab of tabs; track tab.key) {
-        <nz-tab [nzTitle]="tab.title"></nz-tab>
+        <nz-tab [nzTitle]="tab.title" />
       }
     </nz-tabs>
 
@@ -35,12 +35,12 @@
 
       <tbody>
         @for (item of vacanciesTable.data; track item.id) {
-          <tr>
+          <tr class="row-clickable" (dblclick)="openVacancyDetails(item)">
             <td>{{ item.position }}</td>
             <td>{{ item.companyName }}</td>
             <td>{{ formatDate(item.publishedAt) }}</td>
             <td>
-              <nz-tag [nzColor]="toStatusColor(item.status)">{{
+              <nz-tag [nzBordered]="false" [nzColor]="toStatusColor(item.status)">{{
                 toStatusLabel(item.status)
               }}</nz-tag>
             </td>
@@ -50,9 +50,22 @@
                   nz-button
                   nzType="link"
                   [nzLoading]="isActionLoading(item.id)"
-                  (click)="publish(item.id)"
+                  (click)="onActionClick($event); publish(item.id)"
                 >
                   Опубликовать
+                </button>
+
+                <button
+                  nz-button
+                  nzType="link"
+                  nzDanger
+                  nz-popconfirm
+                  nzPopconfirmTitle="Удалить вакансию без публикации?"
+                  [nzLoading]="isActionLoading(item.id)"
+                  (click)="onActionClick($event)"
+                  (nzOnConfirm)="delete(item.id)"
+                >
+                  Удалить
                 </button>
               }
 
@@ -61,7 +74,7 @@
                   nz-button
                   nzType="link"
                   [nzLoading]="isActionLoading(item.id)"
-                  (click)="archive(item.id)"
+                  (click)="onActionClick($event); archive(item.id)"
                 >
                   Снять с публикации
                 </button>
@@ -75,6 +88,7 @@
                   nz-popconfirm
                   nzPopconfirmTitle="Удалить архивную вакансию?"
                   [nzLoading]="isActionLoading(item.id)"
+                  (click)="onActionClick($event)"
                   (nzOnConfirm)="delete(item.id)"
                 >
                   Удалить

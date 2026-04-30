@@ -5,6 +5,7 @@ import { VacancyStatus } from './vacancy-status.type';
 export interface CompanyVacancyItem {
   id: string;
   position: string;
+  companyName: string;
   location: string;
   salary: number | null;
   requirements: string;

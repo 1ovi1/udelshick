@@ -1,0 +1,100 @@
+<section class="page">
+  <button nz-button class="back-btn" nzType="default" (click)="goBack()">
+    <nz-icon nzType="arrow-left" nzTheme="outline" />
+    Вернуться к вакансиям
+  </button>
+
+  @if (isLoading()) {
+    <nz-content class="page-content">
+      <div class="loading-box">Загрузка деталей вакансии...</div>
+    </nz-content>
+  } @else if (loadError(); as errorText) {
+    <nz-content class="page-content">
+      <div class="error-box">{{ errorText }}</div>
+    </nz-content>
+  } @else if (vacancy(); as item) {
+    <nz-content class="page-content">
+      <nz-card>
+        <h1 class="vacancy-title">{{ item.position }}</h1>
+        <h2 class="company-title">{{ item.companyName }}</h2>
+
+        <div class="meta-line">
+          <span>{{ item.location }}</span>
+          <span>{{ formatSalary(item.salary) }}</span>
+          <nz-tag [nzBordered]="false">{{ item.experienceLevel }}</nz-tag>
+        </div>
+
+        <div class="meta-tags">
+          @if (item.matchingSkillsPercent !== null) {
+            <nz-tag [nzBordered]="false" nzColor="blue"
+              >Подходит по навыкам на {{ item.matchingSkillsPercent }}%</nz-tag
+            >
+          }
+
+          @if (item.statusLabel) {
+            <nz-tag [nzBordered]="false" nzColor="default">{{ item.statusLabel }}</nz-tag>
+          }
+
+          @if (item.publishedAt) {
+            <nz-tag [nzBordered]="false" nzColor="green"
+              >Опубликована: {{ formatDate(item.publishedAt) }}</nz-tag
+            >
+          }
+        </div>
+
+        <div class="section">
+          <h3>Требования</h3>
+          <p class="requirements-text">
+            {{ item.requirements ?? 'Подробные требования недоступны.' }}
+          </p>
+        </div>
+
+        @if (item.skills.length > 0) {
+          <div class="section">
+            <h3>Навыки</h3>
+            <div class="skills-list">
+              @for (skill of item.skills; track skill.id) {
+                <nz-tag [nzBordered]="false" nzColor="geekblue">{{ skill.name }}</nz-tag>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="actions">
+          @if (isCandidateRole()) {
+            <button nz-button nzType="primary" [disabled]="!canApply()" (click)="openApplyModal()">
+              {{ canApply() ? 'Откликнуться' : 'Вы уже откликнулись' }}
+            </button>
+          }
+        </div>
+      </nz-card>
+    </nz-content>
+  }
+
+  <nz-modal
+    [nzVisible]="isApplyModalOpen()"
+    nzTitle="Отклик на вакансию"
+    nzOkText="Отправить"
+    nzCancelText="Отмена"
+    [nzOkLoading]="isApplying()"
+    (nzOnCancel)="closeApplyModal()"
+    (nzOnOk)="submitApply()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="applyForm">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="coverLetter">Сопроводительное письмо</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <textarea
+              id="coverLetter"
+              nz-input
+              rows="5"
+              formControlName="coverLetter"
+              placeholder="Коротко расскажите, почему вам интересна эта вакансия"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-container>
+  </nz-modal>
+</section>

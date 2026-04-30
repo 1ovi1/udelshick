@@ -34,13 +34,24 @@
       <nz-form-item>
         <nz-form-label [nzRequired]="true" nzFor="password">Пароль</nz-form-label>
         <nz-form-control [nzErrorTip]="passwordError">
-          <input
-            nz-input
-            id="password"
-            type="password"
-            formControlName="password"
-            placeholder="Пароль"
-          />
+          <nz-input-group [nzSuffix]="passwordSuffix">
+            <input
+              nz-input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Пароль"
+            />
+          </nz-input-group>
+
+          <ng-template #passwordSuffix>
+            <span
+              nz-icon
+              class="password-toggle-icon"
+              [nzType]="showPassword() ? 'eye-invisible' : 'eye'"
+              (click)="togglePasswordVisibility()"
+            ></span>
+          </ng-template>
         </nz-form-control>
       </nz-form-item>
 

@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzTableModule, NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -10,6 +11,7 @@ import { AdminDataService } from '../../services/admin.service';
 import { AdminVacancyItem } from '../../models/admin/admin-vacancy-item.interface';
 import { AdminVacancyTab } from '../../models/admin/admin-vacancy-tab.type';
 import { VacancyStatus } from '../../models/admin/vacancy-status.type';
+import { CandidateVacancyRouteState } from '../../models/candidate/candidate-vacancy-route-state.interface';
 import { ADMIN_VACANCY_TABS } from './constants/admin-vacancy-tab-view.constant';
 import { formatDateRu } from '../../utils/date-format.util';
 import { toVacancyStatusColor, toVacancyStatusLabel } from '../../utils/vacancy-status.util';
@@ -30,6 +32,7 @@ import { toVacancyStatusColor, toVacancyStatusLabel } from '../../utils/vacancy-
 export class AdminVacanciesPage implements OnInit {
   private readonly adminDataService = inject(AdminDataService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   protected readonly isLoading = signal(false);
   protected readonly vacancies = signal<AdminVacancyItem[]>([]);
@@ -93,6 +96,19 @@ export class AdminVacanciesPage implements OnInit {
 
   protected isActionLoading(vacancyId: string): boolean {
     return this.actionVacancyId() === vacancyId;
+  }
+
+  protected openVacancyDetails(item: AdminVacancyItem): void {
+    const state: CandidateVacancyRouteState = {
+      sourceRole: 'admin',
+      vacancyPreview: item,
+    };
+
+    void this.router.navigate(['/layout/vacancy', item.id], { state });
+  }
+
+  protected onActionClick(event: MouseEvent): void {
+    event.stopPropagation();
   }
 
   private loadVacancies(): void {

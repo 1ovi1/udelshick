@@ -1,6 +1,77 @@
 <section class="page">
   <h1 class="page-title">Вакансии</h1>
+
+  <div class="toolbar">
+    <input
+      nz-input
+      placeholder="Профессия, должность или компания"
+      [value]="searchQuery()"
+      (input)="onSearchChange(searchInput.value)"
+      #searchInput
+    />
+    <button nz-button (click)="clearSearch()">Сбросить</button>
+  </div>
+
   <nz-content class="page-content">
-    <div class="hello-box">hello CandidateVacanciesPage</div>
+    <div class="vacancies-scroll-area">
+      @if (isLoading()) {
+        <div class="loading-box">Загрузка вакансий...</div>
+      } @else if (loadError()) {
+        <div class="empty-box">{{ loadError() }}</div>
+      } @else {
+        @if (filteredVacancies().length === 0) {
+          <div class="empty-box">По вашему запросу вакансии не найдены.</div>
+        } @else {
+          <div class="vacancies-list">
+            @for (vacancy of filteredVacancies(); track vacancy.id) {
+              <app-candidate-vacancy-card
+                [vacancy]="vacancy"
+                (openApply)="openApplyModal($event)"
+                (openDetails)="openVacancy($event)"
+              />
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <div class="pagination-wrapper">
+      <nz-pagination
+        [nzPageIndex]="pageIndex()"
+        [nzPageSize]="pageSize()"
+        [nzTotal]="total()"
+        [nzPageSizeOptions]="[4, 8, 12, 16]"
+        [nzShowSizeChanger]="true"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      />
+    </div>
   </nz-content>
+
+  <nz-modal
+    [nzVisible]="isApplyModalOpen()"
+    nzTitle="Отклик на вакансию"
+    nzOkText="Отправить"
+    nzCancelText="Отмена"
+    [nzOkLoading]="isApplying()"
+    (nzOnCancel)="closeApplyModal()"
+    (nzOnOk)="submitApply()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="applyForm">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="coverLetter">Сопроводительное письмо</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <textarea
+              id="coverLetter"
+              nz-input
+              rows="5"
+              formControlName="coverLetter"
+              placeholder="Коротко расскажите, почему вам интересна эта вакансия"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-container>
+  </nz-modal>
 </section>

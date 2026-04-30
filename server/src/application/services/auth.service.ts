@@ -162,11 +162,50 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('User not found');
     }
 
+    const profileName = await this.resolveProfileDisplayName(
+      user.id,
+      user.role,
+      user.email,
+    );
+
     return {
       id: user.id,
       email: user.email,
       role: user.role,
+      name: profileName,
     };
+  }
+
+  private async resolveProfileDisplayName(
+    authId: string,
+    role: Role,
+    email: string,
+  ): Promise<string> {
+    if (role === Role.CANDIDATE) {
+      const profile = await this.candidateProfileRepository.findOne({
+        where: { authId },
+      });
+
+      if (profile) {
+        return `${profile.firstName} ${profile.lastName}`.trim();
+      }
+    }
+
+    if (role === Role.COMPANY) {
+      const profile = await this.companyProfileRepository.findOne({
+        where: { authId },
+      });
+
+      if (profile) {
+        return profile.companyName;
+      }
+    }
+
+    if (role === Role.ADMIN) {
+      return 'Администратор';
+    }
+
+    return email.split('@')[0] || 'User';
   }
 
   private async ensureInitialAdmin(): Promise<void> {

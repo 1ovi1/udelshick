@@ -2,6 +2,7 @@ import { CompanyController } from '@api/controllers/company.controller';
 import { RolesGuard } from '@api/guards/roles.guard';
 import { CompanyService } from '@application/services/company.service';
 import { ResponseService } from '@application/services/response.service';
+import { CompanyDomainService } from '@domain/services/company-domain.service';
 import { ApplicationEntity } from '@infrastructure/entities/application.entity';
 import { CandidateProfileEntity } from '@infrastructure/entities/candidate-profile.entity';
 import { CandidateResumeEducationEntity } from '@infrastructure/entities/candidate-resume-education.entity';
@@ -28,6 +29,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ]),
   ],
   controllers: [CompanyController],
-  providers: [CompanyService, CompanyRepository, ResponseService, RolesGuard],
+  providers: [
+    CompanyService,
+    CompanyRepository,
+    CompanyDomainService,
+    ResponseService,
+    RolesGuard,
+  ],
 })
 export class CompanyModule {}

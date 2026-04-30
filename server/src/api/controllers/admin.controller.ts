@@ -1,5 +1,6 @@
 import { Roles } from '@api/decorators/roles.decorator';
 import { AdminDashboardResponseDto } from '@api/dto/admin/admin-dashboard-response.dto';
+import { AdminVacancyDetailsResponseDto } from '@api/dto/admin/admin-vacancy-details-response.dto';
 import { AdminUsersResponseDto } from '@api/dto/admin/admin-users-response.dto';
 import { AdminVacanciesQueryDto } from '@api/dto/admin/admin-vacancies-query.dto';
 import { AdminVacanciesResponseDto } from '@api/dto/admin/admin-vacancies-response.dto';
@@ -82,6 +83,20 @@ export class AdminController {
   async getVacancies(@Query() query: AdminVacanciesQueryDto) {
     const result = await this.adminService.getVacancies(query, query.status);
     return this.responseService.success('Список вакансий получен', result);
+  }
+
+  @Get('vacancies/:vacancyId')
+  @ApiOperation({
+    summary: 'Детальная информация о вакансии для администратора',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Детали вакансии получены',
+    type: AdminVacancyDetailsResponseDto,
+  })
+  async getVacancyDetails(@Param('vacancyId') vacancyId: string) {
+    const result = await this.adminService.getVacancyDetails(vacancyId);
+    return this.responseService.success('Детали вакансии получены', result);
   }
 
   @Patch('vacancies/:vacancyId/publish')

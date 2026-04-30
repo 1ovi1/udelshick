@@ -7,7 +7,7 @@
       (nzSelectedIndexChange)="onTabIndexChange($event)"
     >
       @for (tab of tabs; track tab.key) {
-        <nz-tab [nzTitle]="tab.title"></nz-tab>
+        <nz-tab [nzTitle]="tab.title" />
       }
     </nz-tabs>
 
@@ -40,7 +40,7 @@
             <td>{{ item.email }}</td>
             <td>{{ formatDate(item.createdAt) }}</td>
             <td>
-              <nz-tag [nzColor]="toStatusColor(item.status)">{{
+              <nz-tag [nzBordered]="false" [nzColor]="toStatusColor(item.status)">{{
                 toStatusLabel(item.status)
               }}</nz-tag>
             </td>

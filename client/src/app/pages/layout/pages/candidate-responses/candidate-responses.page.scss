@@ -17,7 +17,24 @@
   padding: 20px;
 }
 
-.hello-box {
-  color: #344054;
-  font-weight: 600;
+.row-clickable {
+  cursor: pointer;
+}
+
+.row-clickable:hover {
+  background: #f9fafb;
+}
+
+:host ::ng-deep .ant-table-pagination.ant-pagination {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
 }

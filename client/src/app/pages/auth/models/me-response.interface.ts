@@ -4,4 +4,5 @@ export interface MeResponseData {
   id: string;
   email: string;
   role: UserRole;
+  name: string;
 }

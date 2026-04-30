@@ -2,6 +2,7 @@ import { AdminController } from '@api/controllers/admin.controller';
 import { RolesGuard } from '@api/guards/roles.guard';
 import { AdminService } from '@application/services/admin.service';
 import { ResponseService } from '@application/services/response.service';
+import { AdminDomainService } from '@domain/services/admin-domain.service';
 import { AuthEntity } from '@infrastructure/entities/auth.entity';
 import { ApplicationEntity } from '@infrastructure/entities/application.entity';
 import { VacancyEntity } from '@infrastructure/entities/vacancy.entity';
@@ -14,6 +15,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TypeOrmModule.forFeature([AuthEntity, VacancyEntity, ApplicationEntity]),
   ],
   controllers: [AdminController],
-  providers: [AdminService, AdminRepository, ResponseService, RolesGuard],
+  providers: [
+    AdminService,
+    AdminRepository,
+    AdminDomainService,
+    ResponseService,
+    RolesGuard,
+  ],
 })
 export class AdminModule {}
