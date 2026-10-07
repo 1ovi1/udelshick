@@ -1,0 +1,181 @@
+<section class="page">
+  <div class="page-header">
+    <h1 class="page-title">Вакансии компании</h1>
+    <button nz-button nzType="primary" (click)="openCreateModal()">Создать вакансию</button>
+  </div>
+
+  <nz-content class="page-content">
+    <nz-tabs
+      [nzSelectedIndex]="selectedTabIndex()"
+      (nzSelectedIndexChange)="onTabIndexChange($event)"
+    >
+      @for (tab of tabs; track tab.key) {
+        <nz-tab [nzTitle]="tab.title" />
+      }
+    </nz-tabs>
+
+    <nz-table
+      #vacanciesTable
+      [nzData]="vacancies()"
+      [nzFrontPagination]="false"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageIndex()"
+      [nzPageSize]="pageSize()"
+      [nzLoading]="isLoading()"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[5, 10, 20, 50]"
+      (nzQueryParams)="onQueryParamsChange($event)"
+    >
+      <thead>
+        <tr>
+          <th>Позиция</th>
+          <th>Локация</th>
+          <th>Зарплата</th>
+          <th>Опыт</th>
+          <th>Навыки</th>
+          <th>Статус</th>
+          <th>Опубликована</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (item of vacanciesTable.data; track item.id) {
+          <tr class="row-clickable" (dblclick)="openVacancyDetails(item)">
+            <td>{{ item.position }}</td>
+            <td>{{ item.location }}</td>
+            <td>{{ formatSalary(item.salary) }}</td>
+            <td>{{ toExperienceLabel(item.experienceLevel) }}</td>
+            <td>
+              <div class="skills-list">
+                @for (skill of item.skills; track skill.id) {
+                  <nz-tag [nzBordered]="false">{{ skill.name }}</nz-tag>
+                }
+              </div>
+            </td>
+            <td>
+              <nz-tag [nzBordered]="false" [nzColor]="toStatusColor(item.status)">{{
+                toStatusLabel(item.status)
+              }}</nz-tag>
+            </td>
+            <td>{{ formatDate(item.publishedAt) }}</td>
+            <td>
+              @if (item.status === 'archived') {
+                <button
+                  nz-button
+                  nzType="link"
+                  [nzLoading]="isActionLoading(item.id)"
+                  (click)="onActionClick($event); sendForReview(item.id)"
+                >
+                  На рассмотрение
+                </button>
+              }
+
+              @if (item.status === 'pending_review' || item.status === 'published') {
+                <button
+                  nz-button
+                  nzType="link"
+                  nzDanger
+                  [nzLoading]="isActionLoading(item.id)"
+                  (click)="onActionClick($event); archive(item.id)"
+                >
+                  В архив
+                </button>
+              }
+
+              <button
+                nz-button
+                nzType="link"
+                [nzLoading]="isActionLoading(item.id)"
+                (click)="onActionClick($event); openEditModal(item)"
+              >
+                Редактировать
+              </button>
+
+              <button
+                nz-button
+                nzType="link"
+                nzDanger
+                [nzLoading]="isActionLoading(item.id)"
+                (click)="onActionClick($event); deleteVacancy(item.id)"
+              >
+                Удалить
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-content>
+
+  <nz-modal
+    [nzVisible]="isCreateModalOpen()"
+    nzTitle="Новая вакансия"
+    nzOkText="Создать"
+    nzCancelText="Отмена"
+    [nzOkLoading]="isCreating()"
+    (nzOnCancel)="closeCreateModal()"
+    (nzOnOk)="submitCreateVacancy()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="createForm" class="vacancy-form">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="position">Позиция</nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Укажите позицию от 2 символов">
+            <input id="position" nz-input formControlName="position" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="location">Локация</nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Укажите локацию от 2 символов">
+            <input id="location" nz-input formControlName="location" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="salary">Зарплата</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <nz-input-number
+              id="salary"
+              formControlName="salary"
+              [nzMin]="0"
+              [nzStep]="5000"
+              [nzPrecision]="0"
+              nzPlaceHolder="Например, 180000"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="experienceLevel">Опыт</nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Выберите уровень опыта">
+            <nz-select id="experienceLevel" formControlName="experienceLevel">
+              @for (item of experienceOptions; track item.value) {
+                <nz-option [nzValue]="item.value" [nzLabel]="item.label" />
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="skillIds">Навыки</nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Выберите минимум один навык">
+            <nz-select id="skillIds" formControlName="skillIds" nzMode="multiple" nzShowSearch>
+              @for (skill of skills(); track skill.id) {
+                <nz-option [nzValue]="skill.id" [nzLabel]="skill.name" />
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="requirements">Требования</nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Минимум 10 символов">
+            <textarea id="requirements" nz-input rows="4" formControlName="requirements"></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-container>
+  </nz-modal>
+</section>
